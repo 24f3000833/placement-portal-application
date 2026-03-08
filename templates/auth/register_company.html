@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card-shadow p-4">
+            <h2 class = "text-center mb-4">Company Registration</h2>
+            <form method="POST" action="/register/company" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label>Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter your company name" required>
+                </div>
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" placeholder="Enter your Email" required>
+                </div>
+                <div class="mb-3">
+                    <label>Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Create password" required>
+                </div>
+                <div class="mb-3">
+                    <label>Website</label>
+                    <input type="text" name="website" class="form-control" placeholder="Enter website (optional)">
+                </div>
+                <div class="mb-3">
+                    <label>Registration Certificate (PDF Only)</label>
+                    <input type="file" name="certificate" class="form-control" accept=".pdf" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Register</button>
+            </form>
+            <hr>
+            <div class="text-center">
+                <p>Already Registered?<a href="/login">Login here!</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

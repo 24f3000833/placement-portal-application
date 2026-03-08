@@ -10,3 +10,6 @@ __pycache__/
 
 #Databse
 instance/
+
+#Uploaded files
+static/upload/
