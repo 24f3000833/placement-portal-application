@@ -7,3 +7,6 @@ __pycache__/
 
 #My VS code settings
 .vscode/
+
+#Databse
+instance/
