@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Welcome, Admin!</h2>
+    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Logout</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card text-white bg-primary text-center p-3">
+            <h3>{{ total_students }}</h3>
+            <p class="mb-0">Students</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-white bg-success text-center p-3">
+            <h3>{{ total_companies }}</h3>
+            <p class="mb-0">Companies</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-white bg-warning text-center p-3">
+            <h3>{{ total_drives }}</h3>
+            <p class="mb-0">Drives</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-white bg-danger text-center p-3">
+            <h3>{{ total_applications }}</h3>
+            <p class="mb-0">Applications</p>
+        </div>
+    </div>
+</div>
+
+<form method="GET" action="{{ url_for('admin_dashboard') }}" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="search" class="form-control"
+               placeholder="Search students or companies by name or ID..."
+               value="{{ search }}">
+        <button class="btn btn-dark" type="submit">Search</button>
+        {% if search %}
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Clear</a>
+        {% endif %}
+    </div>
+</form>
+
+{% if search %}
+
+<div class="card mb-4 border-dark">
+    <div class="card-header bg-dark text-white fw-bold">
+        Search Results for "{{ search }}"
+    </div>
+    <div class="card-body" style="max-height:350px; overflow-y:auto;">
+        {% set company_results = pending_companies + all_companies %}
+        {% if company_results %}
+            <p class="fw-bold text-success mb-2">Companies</p>
+            {% for c in company_results %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>#{{ c.id }} {{ c.name }}</strong> | {{ c.email }} |
+                    <span class="badge
+                        {% if c.approval_status == 'Approved' %}bg-success
+                        {% elif c.approval_status == 'Pending' %}bg-warning text-dark
+                        {% else %}bg-danger{% endif %}">
+                        {{ c.approval_status }}
+                    </span>
+                    {% if c.is_blacklisted %}
+                        <span class="badge bg-dark">Blacklisted</span>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('admin_company_detail', id=c.id) }}"
+                   class="btn btn-sm btn-outline-primary">View Details</a>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if all_students %}
+            <p class="fw-bold text-primary mt-3 mb-2">Students</p>
+            {% for s in all_students %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>#{{ s.id }} {{ s.name }}</strong> | {{ s.degree }} | {{ s.branch }} | CGPA: {{ s.cgpa }}
+                    {% if s.is_blacklisted %}
+                        <span class="badge bg-dark">Blacklisted</span>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('admin_student_detail', id=s.id) }}"
+                   class="btn btn-sm btn-outline-primary">View Details</a>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if not company_results and not all_students %}
+            <p class="text-muted mb-0">No results found for "{{ search }}"</p>
+        {% endif %}
+    </div>
+</div>
+
+{% else %}
+
+<div class="card mb-4">
+    <div class="card-header bg-warning text-dark fw-bold">
+        Pending Company Approvals ({{ pending_companies|length }})
+    </div>
+    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+        {% if pending_companies %}
+            {% for c in pending_companies %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>#{{ c.id }} {{ c.name }}</strong> | {{ c.email }}
+                    {% if c.website %}| <a href="{{ c.website }}" target="_blank">{{ c.website }}</a>{% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('static', filename='upload/certificates/' + c.certificate) }}"
+                       target="_blank" class="btn btn-sm btn-outline-secondary">Certificate</a>
+                    <a href="{{ url_for('admin_company_detail', id=c.id) }}"
+                       class="btn btn-sm btn-outline-primary">View Details</a>
+                    <a href="{{ url_for('approve_company', id=c.id) }}"
+                       class="btn btn-sm btn-success">Approve</a>
+                    <a href="{{ url_for('reject_company', id=c.id) }}"
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Are you sure you want to reject and delete {{ c.name }}?')">Reject</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted mb-0">No pending approvals.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-success text-white fw-bold">
+        Registered Companies ({{ all_companies|length }})
+    </div>
+    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+        {% if all_companies %}
+            {% for c in all_companies %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>#{{ c.id }} {{ c.name }}</strong> | {{ c.email }} |
+                    <span class="badge bg-success">Approved</span>
+                    {% if c.is_blacklisted %}
+                        <span class="badge bg-dark">Blacklisted</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('admin_company_detail', id=c.id) }}"
+                       class="btn btn-sm btn-outline-primary">View Details</a>
+                    <a href="{{ url_for('blacklist_company', id=c.id) }}"
+                       class="btn btn-sm {% if c.is_blacklisted %}btn-outline-success{% else %}btn-outline-danger{% endif %}">
+                        {% if c.is_blacklisted %}Unblacklist{% else %}Blacklist{% endif %}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted mb-0">No companies registered yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white fw-bold">
+        Registered Students ({{ all_students|length }})
+    </div>
+    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+        {% if all_students %}
+            {% for s in all_students %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>#{{ s.id }} {{ s.name }}</strong> | {{ s.degree }} | {{ s.branch }} | CGPA: {{ s.cgpa }}
+                    {% if s.is_blacklisted %}
+                        <span class="badge bg-dark">Blacklisted</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('admin_student_detail', id=s.id) }}"
+                       class="btn btn-sm btn-outline-primary">View Details</a>
+                    <a href="{{ url_for('blacklist_student', id=s.id) }}"
+                       class="btn btn-sm {% if s.is_blacklisted %}btn-outline-success{% else %}btn-outline-warning{% endif %}">
+                        {% if s.is_blacklisted %}Unblacklist{% else %}Blacklist{% endif %}
+                    </a>
+                    <a href="{{ url_for('delete_student', id=s.id) }}"
+                       class="btn btn-sm btn-outline-danger"
+                       onclick="return confirm('Delete {{ s.name }}? This cannot be undone!')">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted mb-0">No students registered yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white fw-bold">
+        Ongoing Drives ({{ ongoing_drives|length }})
+    </div>
+    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+        {% if ongoing_drives %}
+            {% for d in ongoing_drives %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>#{{ d.id }} {{ d.job_title }}</strong> | {{ d.company.name }} |
+                    {{ d.applications|length }} Applications
+                </div>
+                <a href="{{ url_for('admin_drive_detail', id=d.id) }}"
+                   class="btn btn-sm btn-outline-dark">View Details</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted mb-0">No ongoing drives.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

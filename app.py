@@ -22,7 +22,7 @@ def home():
     return render_template("home.html")
 
 
-
+############  AUTHENTICATION WORKSS  ###############################
 #LOGIN Route
 @app.route("/login", methods=["GET","POST"])
 def login():
@@ -75,7 +75,7 @@ def login():
     
     return render_template("auth/login.html")
                 
-
+#Admin Login
 @app.route('/admin/login', methods=["GET" , "POST"])
 def admin_login():
     if "user_id" in session:
@@ -95,17 +95,7 @@ def admin_login():
             return redirect(url_for("login"))
     return render_template("auth/admin_login.html")
 
-
-
-
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    flash("Logged out successfully","success")
-    return redirect(url_for("login"))
-
-
+#Student registration
 @app.route("/register/student" , methods=["GET", "POST"])
 def register_student():
     if request.method=="POST":
@@ -152,7 +142,7 @@ def register_student():
 
 
 
-
+#Company registration
 @app.route("/register/company" , methods=["GET", "POST"])
 def register_company():
     if request.method=="POST":
@@ -194,14 +184,153 @@ def register_company():
         return redirect(url_for("login"))
     return render_template("auth/register_company.html")
 
+####################################################################
 
 
+####  ADMIN AND ITS FUNCTIONS  ######
 
-
+#Admin dashboard
 @app.route("/admin/dashboard")
 def admin_dashboard():
-    return "Admin Dashboard--COming soon..."
+    if "user_id" not in session or session["role"] != "admin":
+        flash("Please login as Admin","danger")
+        return redirect(url_for("admin_login"))
+    
+    search = request.args.get("search", "").strip()
 
+    
+    total_students=Student.query.count()
+    total_companies=Company.query.count()
+    total_drives=PlacementDrive.query.count()
+    total_applications=Application.query.count()
+
+    pending_companies=Company.query.filter_by(approval_status="Pending").all()
+    all_companies=Company.query.filter_by(approval_status="Approved").all()
+    all_students=Student.query.all()
+    ongoing_drives=PlacementDrive.query.filter_by(status="Approved").all()
+
+    if search:
+        
+        is_digit = search.isdigit()
+
+        
+        pending_companies = Company.query.filter(
+            Company.approval_status == "Pending",
+            (Company.name.ilike(f"%{search}%")) |
+            (Company.id == int(search) if is_digit else False)
+        ).all()
+
+        
+        all_companies = Company.query.filter(
+            Company.approval_status == "Approved",
+            (Company.name.ilike(f"%{search}%")) |
+            (Company.id == int(search) if is_digit else False)
+        ).all()
+
+
+        all_students = Student.query.filter(
+            (Student.name.ilike(f"%{search}%")) |
+            (Student.id == int(search) if is_digit else False)
+        ).all()
+
+    else:
+        
+        pending_companies = Company.query.filter_by(approval_status="Pending").all()
+        all_companies = Company.query.filter_by(approval_status="Approved").all()
+        all_students = Student.query.all()
+
+    return render_template("admin/admin_dashboard.html",
+        total_students=total_students,
+        total_companies=total_companies,
+        total_drives=total_drives,
+        total_applications=total_applications,
+        pending_companies=pending_companies,
+        all_companies=all_companies,
+        all_students=all_students,
+        ongoing_drives=ongoing_drives,
+        search=search
+    )
+
+@app.route("/admin/company/<int:id>/approve")
+def approve_company(id):
+    if "user_id" not in session or session["role"] != "admin":
+        return redirect(url_for("admin_login"))
+    company = Company.query.get_or_404(id)
+    company.approval_status = "Approved"
+    db.session.commit()
+    flash(f"{company.name} has been approved!", "success")
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/company/<int:id>/reject")
+def reject_company(id):
+    if "user_id" not in session or session["role"] != "admin":
+        return redirect(url_for("admin_login"))
+    company = Company.query.get_or_404(id)
+    name=company.name
+    db.session.delete(company)
+    db.session.commit()
+    flash(f"{company.name} has been rejected", "warning")
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/company/<int:id>/blacklist")
+def blacklist_company(id):
+    if "user_id" not in session or session["role"] != "admin":
+        return redirect(url_for("admin_login"))
+    company = Company.query.get_or_404(id)
+    company.is_blacklisted = not company.is_blacklisted
+    if company.is_blacklisted:
+        for drive in company.drives:
+            drive.status = "Closed"
+        flash(f"{company.name} blacklisted...All drives closed", "danger")
+    else:
+        flash(f"{company.name} un-blacklisted", "success")
+    db.session.commit()
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/student/<int:id>/blacklist")
+def blacklist_student(id):
+    if "user_id" not in session or session["role"] != "admin":
+        return redirect(url_for("admin_login"))
+    student = Student.query.get_or_404(id)
+    student.is_blacklisted = not student.is_blacklisted
+    action = "blacklisted" if student.is_blacklisted else "un-blacklisted"
+    flash(f"{student.name} has been {action}", "warning")
+    db.session.commit()
+    return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/student/<int:id>/delete")
+def delete_student(id):
+    if "user_id" not in session or session["role"] != "admin":
+        return redirect(url_for("admin_login"))
+    student = Student.query.get_or_404(id)
+    Application.query.filter_by(student_id=id).delete()
+    db.session.delete(student)
+    db.session.commit()
+    flash("Student deleted successfully.", "success")
+    return redirect(url_for("admin_dashboard"))
+
+#########################################################################
+
+#LogOut
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("Logged out successfully","success")
+    return redirect(url_for("login"))
+
+######################################################
+
+@app.route("/admin/student/<int:id>")
+def admin_student_detail(id):
+    return "Coming Soon"
+
+@app.route("/admin/company/<int:id>")
+def admin_company_detail(id):
+    return "Coming Soon"
 
 @app.route("/company/dashboard")
 def company_dashboard():
@@ -211,7 +340,6 @@ def company_dashboard():
 @app.route("/student/dashboard")
 def student_dashboard():
     return "Student--COming soon..."
-
 
 
 if __name__=="__main__":
