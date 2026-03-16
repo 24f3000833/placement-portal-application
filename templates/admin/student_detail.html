@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Student Details</h2>
+    <a href="{{url_for('admin_dashboard')}}" class="btn-outline-secondary">Black</a>
+</div>
+<div class="card mb-4">
+    <div class="card_header bg-primary text-white fw-bold p-2">
+        Student Information
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tr>
+                        <th>Student ID</th>
+                        <td>#{{student.id}}</td>
+
+                    </tr>
+                    <tr>
+                        <th>Student Name</th>
+                        <td>{{student.name}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <th>Student Email</th>
+                        <td>{{student.email}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <th>Student Phone</th>
+                        <td>{{student.phone}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <th>Degree</th>
+                        <td>{{student.degree}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <th>Branch</th>
+                        <td>{{student.branch}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <th>CGPA</th>
+                        <td>{{student.cgpa}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td>
+                            {% if student.is_blacklisted %}
+                                <span class="badge bg-danger">Blacklisted</span>
+                            {% else %}
+                                <span class="badge bg-success">Active</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Joined</th>
+                        <td>{{ joined_date }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <a href="{{ url_for('static',filename='upload/resumes/' + student.resume)}}"
+            target="_blank" class="btn btn-outline-primary">View Resume</a>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-header bg-secondary text-white fw-bold">
+        Application History
+    </div>
+    <div class="card-body" style="max-height: 300px; overflow-y:auto;">
+        {% if applications %}
+            {% for app in applications %}
+            <div class="d-flex justify-content-between align-item-center border-bottom py-2">
+                <div>
+                    <strong>{{ app.drive.job_title }}</strong> | {{ app.drive.company.name }} |
+                    <span class="badge
+                        {% if app.status == 'Selected' %}bg-success
+                        {% elif app.status == 'Shortlisted' %}bg-warning text-dark
+                        {% elif app.status == 'Rejected' %}bg-danger
+                        {% else %}bg-secondary{% endif %}">
+                        {{ app.status }}
+                    </span>
+                </div>
+                <a href="{{ url_for('admin_application_detail', id=app.id) }}"
+                   class="btn btn-sm btn-outline-primary">View Application</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted mb-0">No applications yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="d-flex gap-2">
+    <a href="{{ url_for('blacklist_student', id=student.id) }}"
+       class="btn {% if student.is_blacklisted %}btn-success{% else %}btn-warning{% endif %}">
+        {% if student.is_blacklisted %}Unblacklist{% else %}Blacklist{% endif %}
+    </a>
+    <a href="{{ url_for('delete_student', id=student.id) }}"
+       class="btn btn-danger"
+       onclick="return confirm('Delete {{ student.name }}? This cannot be undone!')">Delete</a>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Back</a>
+</div>
+
+{% endblock %}
+           

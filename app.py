@@ -326,7 +326,16 @@ def logout():
 
 @app.route("/admin/student/<int:id>")
 def admin_student_detail(id):
-    return "Coming Soon"
+    if "user_id" not in session or session["role"]!="admin":
+        flash("Please login as Admin","danger")
+        return redirect(url_for("admin_login"))
+    student=Student.query.get_or_404(id)
+    applications=Application.query.filter_by(student_id=id).all()
+    joined_date=student.created_at.strftime("%d %b %Y")
+
+    return render_template("admin/student_detail.html",student=student,applications=applications,joined_date=joined_date)
+
+    
 
 @app.route("/admin/company/<int:id>")
 def admin_company_detail(id):
