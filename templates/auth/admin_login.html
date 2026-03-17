@@ -1,40 +1,37 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<div class="row justify-content-center">
-    <div class="col-md-5">
+<div class="auth-wrap">
+    <div class="auth-left">
+        <h1>Placify</h1>
+        <p>Admin portal. Manage students, companies, placement drives and applications from one place.</p>
+    </div>
+    <div class="auth-right">
+        <div class="auth-box">
+            <h2>Admin Login</h2>
+            <p class="subtext">Sign in with your admin credentials</p>
 
-        <div class="card shadow p-4">
-
-            <h2 class="text-center mb-4">Admin Login</h2>
-
-            <form method="POST" action="/admin/login">
-
+            <form method="POST" action="{{ url_for('admin_login') }}">
                 <div class="mb-3">
-                    <label>Username</label>
-                    <input type="text" name="username" class="form-control" placeholder="Enter username" required>
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" 
+                           placeholder="Enter username" required>
                 </div>
-
-                <div class="mb-3">
-                    <label>Password</label>
-                    <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                <div class="mb-4">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" 
+                           placeholder="Enter password" required>
                 </div>
-
-                <button type="submit" class="btn btn-danger w-100">
-                    Login as Admin
-                </button>
-
+                <button type="submit" class="btn btn-primary w-100">Sign in as Admin</button>
             </form>
 
-            <hr>
+            <hr class="my-4">
 
-            <div class="text-center">
-                <a href="/login">Back to Main Login</a>
-            </div>
-
+            <p class="text-center" style="font-size:13.5px; color:var(--text-light)">
+                Not an admin?
+                <a href="{{ url_for('login') }}" class="subtle-link">Go to login</a>
+            </p>
         </div>
-
     </div>
 </div>
 

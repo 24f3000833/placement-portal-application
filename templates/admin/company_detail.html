@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">Company Details</h1>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        Company Information
+    </div>
+    <div class="card-body">
+        <table class="table table-borderless">
+            <tr>
+                <th style="width:25%">Company ID</th>
+                <td>#{{ company.id }}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{ company.name }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ company.email }}</td>
+            </tr>
+            <tr>
+                <th>Website</th>
+                <td>
+                    {% if company.website %}
+                        <a href="{{ company.website }}" target="_blank" class="subtle-link">{{ company.website }}</a>
+                    {% else %}
+                        <span class="text-muted">Not provided</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>
+                    <span class="badge
+                        {% if company.approval_status == 'Approved' %}pill-approved
+                        {% elif company.approval_status == 'Pending' %}pill-pending
+                        {% else %}pill-rejected{% endif %}">
+                        {{ company.approval_status }}
+                    </span>
+                    {% if company.is_blacklisted %}
+                        <span class="badge pill-rejected ms-1">Blacklisted</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Joined</th>
+                <td>{{ joined_date }}</td>
+            </tr>
+        </table>
+
+        <a href="{{ url_for('static', filename='upload/certificates/' + company.certificate) }}"
+           target="_blank" class="btn btn-outline-primary">
+            <i class="bi bi-file-earmark-pdf"></i> View Certificate
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        Ongoing Drives
+        <span class="badge pill-approved ms-2">{{ ongoing_drives|length }}</span>
+    </div>
+    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+        {% if ongoing_drives %}
+            {% for d in ongoing_drives %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>#{{ d.id }} {{ d.job_title }}</strong>
+                    <span class="text-muted ms-2">{{ d.applications|length }} Applications</span>
+                    {% if d.salary %}
+                        <span class="text-muted ms-2">{{ d.salary }}</span>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('admin_drive_detail', id=d.id) }}"
+                   class="btn btn-sm btn-outline-primary">View Details</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-box">
+                <i class="bi bi-briefcase"></i>
+                <p>No ongoing drives</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        Closed Drives
+        <span class="badge pill-closed ms-2">{{ closed_drives|length }}</span>
+    </div>
+    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+        {% if closed_drives %}
+            {% for d in closed_drives %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>#{{ d.id }} {{ d.job_title }}</strong>
+                    <span class="text-muted ms-2">{{ d.applications|length }} Applications</span>
+                </div>
+                <a href="{{ url_for('admin_drive_detail', id=d.id) }}"
+                   class="btn btn-sm btn-outline-secondary">View Details</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-box">
+                <i class="bi bi-archive"></i>
+                <p>No closed drives</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="d-flex gap-2">
+    <a href="{{ url_for('blacklist_company', id=company.id) }}"
+       class="btn {% if company.is_blacklisted %}btn-outline-success{% else %}btn-outline-danger{% endif %}">
+        {% if company.is_blacklisted %}Unblacklist{% else %}Blacklist{% endif %}
+    </a>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Back</a>
+</div>
+
+{% endblock %}

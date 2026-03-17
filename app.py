@@ -1,4 +1,4 @@
-from flask import Flask , render_template , request, redirect,url_for,session , flash , Response
+from flask import Flask , render_template , request, redirect,url_for,session , flash , Response , send_from_directory
 from models import db , Admin , Company , Student , PlacementDrive, Application
 from werkzeug.security import generate_password_hash , check_password_hash
 from werkzeug.utils import secure_filename
@@ -19,7 +19,7 @@ db.init_app(app)
 #Home Route
 @app.route("/")
 def home():
-    return render_template("home.html")
+    return redirect(url_for("login"))
 
 
 ############  AUTHENTICATION WORKSS  ###############################
@@ -208,6 +208,8 @@ def admin_dashboard():
     all_companies=Company.query.filter_by(approval_status="Approved").all()
     all_students=Student.query.all()
     ongoing_drives=PlacementDrive.query.filter_by(status="Approved").all()
+    all_applications = Application.query.order_by(Application.applied_at.desc()).limit(20).all()
+
 
     if search:
         
@@ -248,7 +250,8 @@ def admin_dashboard():
         all_companies=all_companies,
         all_students=all_students,
         ongoing_drives=ongoing_drives,
-        search=search
+        search=search,
+        all_applications=all_applications
     )
 
 @app.route("/admin/company/<int:id>/approve")
@@ -313,16 +316,36 @@ def delete_student(id):
     flash("Student deleted successfully.", "success")
     return redirect(url_for("admin_dashboard"))
 
-#########################################################################
+@app.route("/admin/drive/<int:id>/approve")
+def approve_drive(id):
+    if "user_id" not in session or session["role"] != "admin":
+        return redirect(url_for("admin_login"))
+    drive = PlacementDrive.query.get_or_404(id)
+    drive.status = "Approved"
+    db.session.commit()
+    flash(f"{drive.job_title} has been approved!", "success")
+    return redirect(url_for("admin_drive_detail", id=id))
 
-#LogOut
-@app.route("/logout")
-def logout():
-    session.clear()
-    flash("Logged out successfully","success")
-    return redirect(url_for("login"))
+@app.route("/admin/drive/<int:id>/reject")
+def reject_drive(id):
+    if "user_id" not in session or session["role"] != "admin":
+        return redirect(url_for("admin_login"))
+    drive = PlacementDrive.query.get_or_404(id)
+    drive.status = "Rejected"
+    db.session.commit()
+    flash(f"{drive.job_title} has been rejected.", "warning")
+    return redirect(url_for("admin_drive_detail", id=id))
 
-######################################################
+@app.route("/admin/drive/<int:id>/close")
+def close_drive(id):
+    if "user_id" not in session or session["role"] != "admin":
+        return redirect(url_for("admin_login"))
+    drive = PlacementDrive.query.get_or_404(id)
+    drive.status = "Closed"
+    db.session.commit()
+    flash(f"{drive.job_title} has been closed.", "info")
+    return redirect(url_for("admin_drive_detail", id=id))
+
 
 @app.route("/admin/student/<int:id>")
 def admin_student_detail(id):
@@ -339,7 +362,56 @@ def admin_student_detail(id):
 
 @app.route("/admin/company/<int:id>")
 def admin_company_detail(id):
-    return "Coming Soon"
+    if "user_id" not in session or session["role"] != "admin":
+        flash("Please login as Admin", "danger")
+        return redirect(url_for("admin_login"))
+    
+    company = Company.query.get_or_404(id)
+    joined_date = company.created_at.strftime("%d %b %Y")
+    ongoing_drives = PlacementDrive.query.filter_by(company_id=id, status="Approved").all()
+    closed_drives = PlacementDrive.query.filter_by(company_id=id, status="Closed").all()
+    
+    return render_template("admin/company_detail.html",
+        company=company,
+        joined_date=joined_date,
+        ongoing_drives=ongoing_drives,
+        closed_drives=closed_drives
+    )
+
+@app.route("/admin/drive/<int:id>")
+def admin_drive_detail(id):
+    if "user_id" not in session or session["role"] != "admin":
+        flash("Please login as Admin", "danger")
+        return redirect(url_for("admin_login"))
+    
+    drive = PlacementDrive.query.get_or_404(id)
+    applications = Application.query.filter_by(drive_id=id).all()
+    
+    return render_template("admin/drive_detail.html",
+        drive=drive,
+        applications=applications
+    )
+
+def admin_drive_detail(id):
+    if "user_id" not in session or session["role"] != "admin":
+        flash("Please login as Admin", "danger")
+        return redirect(url_for("admin_login"))
+    
+    drive = PlacementDrive.query.get_or_404(id)
+    applications = Application.query.filter_by(drive_id=id).all()
+    
+    return render_template("admin/drive_detail.html",
+        drive=drive,
+        applications=applications
+    )
+#####################################################################################3
+
+#LogOut
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("Logged out successfully","success")
+    return redirect(url_for("login"))
 
 @app.route("/company/dashboard")
 def company_dashboard():
@@ -349,6 +421,10 @@ def company_dashboard():
 @app.route("/student/dashboard")
 def student_dashboard():
     return "Student--COming soon..."
+
+@app.route("/upload/resumes/<filename>")
+def uploaded_resume(filename):
+    return send_from_directory("static/upload/resumes", filename)
 
 
 if __name__=="__main__":

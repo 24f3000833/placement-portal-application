@@ -1,37 +1,52 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="row justify-content-center">
-    <div class="col-md-5">
-        <div class="card shadow p-4">
-            <h2 class="text-center mb-4">Welcome to Placify</h2>
-            <form method="POST" action="/login">
+<div class="auth-wrap">
+    <div class="auth-left">
+        <h1>Placify</h1>
+        <p>Your complete campus placement portal. Connect students with top companies and manage the entire placement process in one place.</p>
+    </div>
+    <div class="auth-right">
+        <div class="auth-box">
+            <h2>Welcome</h2>
+            <p class="subtext">Sign in to your account to continue</p>
+
+            <form method="POST" action="{{ url_for('login') }}">
                 <div class="mb-3">
-                    <label>Email</label>
-                    <input type="email" name="email" class="form-control" placeholder="Enter your Email" required>
+                    <label class="form-label">Email address</label>
+                    <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
                 </div>
                 <div class="mb-3">
-                    <label>Password</label>
-                    <input type="password" name="password" class="form-control" placeholder="Enter your password" required>
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Enter password" required>
                 </div>
-                <div class="mb-3">
-                    <label>Role</label>
+                <div class="mb-4">
+                    <label class="form-label">Login as</label>
                     <select name="role" class="form-select" required>
-                        <option value="student">Student</option>
+                        <option value="" disabled selected>Select role</option>
                         <option value="company">Company</option>
+                        <option value="student">Student</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Login</button>
+                <button type="submit" class="btn btn-primary w-100">Sign in</button>
             </form>
-            <hr>
-            <div class="text-center">
-                <p>Register as Student? <a href="/register/student">Click Here</a></p>
-                <p>Register as Company? <a href="/register/company">Click Here</a></p>
-                <div class="text-center mt-2">
-                    <small><a href="/admin/login">Admin?Login Here</a></small>
-                </div>
-            </div>
+
+            <hr class="my-4">
+
+            <p class="text-center" style="font-size:13.5px; color:var(--text-light)">
+                New student?
+                <a href="{{ url_for('register_student') }}" class="subtle-link">Register here</a>
+            </p>
+            <p class="text-center" style="font-size:13.5px; color:var(--text-light)">
+                New company?
+                <a href="{{ url_for('register_company') }}" class="subtle-link">Register here</a>
+            </p>
+            <p class="text-center" style="font-size:13.5px; color:var(--text-light)">
+                Admin?
+                <a href="{{ url_for('admin_login') }}" class="subtle-link">Login here</a>
+            </p>
         </div>
     </div>
 </div>
+
 {% endblock %}

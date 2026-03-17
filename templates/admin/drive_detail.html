@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">Drive Details</h1>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        Drive Information
+    </div>
+    <div class="card-body">
+        <table class="table table-borderless">
+            <tr>
+                <th style="width:25%">Drive ID</th>
+                <td>#{{ drive.id }}</td>
+            </tr>
+            <tr>
+                <th>Company</th>
+                <td>
+                    <a href="{{ url_for('admin_company_detail', id=drive.company.id) }}" class="subtle-link">
+                        {{ drive.company.name }}
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th>Job Title</th>
+                <td>{{ drive.job_title }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ drive.job_description or "Not provided" }}</td>
+            </tr>
+            <tr>
+                <th>Eligibility</th>
+                <td>{{ drive.eligibility or "Not provided" }}</td>
+            </tr>
+            <tr>
+                <th>Salary</th>
+                <td>{{ drive.salary or "Not provided" }}</td>
+            </tr>
+            <tr>
+                <th>Location</th>
+                <td>{{ drive.location or "Not provided" }}</td>
+            </tr>
+            <tr>
+                <th>Deadline</th>
+                <td>{{ drive.deadline or "Not provided" }}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>
+                    <span class="badge
+                        {% if drive.status == 'Approved' %}pill-approved
+                        {% elif drive.status == 'Pending' %}pill-pending
+                        {% elif drive.status == 'Closed' %}pill-closed
+                        {% else %}pill-rejected{% endif %}">
+                        {{ drive.status }}
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th>Created At</th>
+                <td>{{ drive.created_at.strftime("%d %b %Y") }}</td>
+            </tr>
+        </table>
+
+        <div class="d-flex gap-2">
+            {% if drive.status == "Pending" %}
+                <a href="{{ url_for('approve_drive', id=drive.id) }}"
+                   class="btn btn-outline-success">Approve Drive</a>
+                <a href="{{ url_for('reject_drive', id=drive.id) }}"
+                   class="btn btn-outline-danger">Reject Drive</a>
+            {% elif drive.status == "Approved" %}
+                <a href="{{ url_for('close_drive', id=drive.id) }}"
+                   class="btn btn-outline-warning">Close Drive</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        Applications
+        <span class="badge pill-applied ms-2">{{ applications|length }}</span>
+    </div>
+    <div class="card-body" style="max-height:350px; overflow-y:auto;">
+        {% if applications %}
+            {% for app in applications %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>{{ app.student.name }}</strong>
+                    <span class="text-muted ms-2">{{ app.student.degree }} | {{ app.student.branch }} | CGPA: {{ app.student.cgpa }}</span>
+                    <span class="badge ms-2
+                        {% if app.status == 'Selected' %}pill-selected
+                        {% elif app.status == 'Shortlisted' %}pill-shortlisted
+                        {% elif app.status == 'Rejected' %}pill-rejected
+                        {% else %}pill-applied{% endif %}">
+                        {{ app.status }}
+                    </span>
+                </div>
+                <a href="{{ url_for('admin_application_detail', id=app.id) }}"
+                   class="btn btn-sm btn-outline-primary">View Application</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-box">
+                <i class="bi bi-people"></i>
+                <p>No applications yet</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
