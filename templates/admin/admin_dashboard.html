@@ -129,6 +129,43 @@
 
 <div class="card mb-4">
     <div class="card-header">
+        Pending Drive Approvals
+        <span class="badge pill-pending ms-2">{{ pending_drives|length }}</span>
+    </div>
+    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+        {% if pending_drives %}
+            {% for d in pending_drives %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>#{{ d.id }} {{ d.job_title }}</strong>
+                    <span class="text-muted ms-2">{{ d.company.name }}</span>
+                    {% if d.salary %}
+                    <span class="text-muted ms-2">{{ d.salary }}</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('admin_drive_detail', id=d.id) }}"
+                       class="btn btn-sm btn-outline-primary">View Details</a>
+                    <a href="{{ url_for('approve_drive', id=d.id) }}"
+                       class="btn btn-sm btn-outline-success">Approve</a>
+                    <a href="{{ url_for('reject_drive', id=d.id) }}"
+                       class="btn btn-sm btn-outline-danger">Reject</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-box">
+                <i class="bi bi-check-circle"></i>
+                <p>No pending drive approvals</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+
+
+<div class="card mb-4">
+    <div class="card-header">
         Registered Companies
         <span class="badge pill-approved ms-2">{{ all_companies|length }}</span>
     </div>

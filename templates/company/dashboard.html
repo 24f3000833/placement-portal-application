@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">
+        Welcome, {{ company.name }}
+        <small>{{ company.email }}</small>
+    </h1>
+    <a href="{{ url_for('company_create_drive') }}" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Create Drive
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-tile">
+            <div class="label">Total Drives</div>
+            <div class="value">{{ total_drives }}</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-tile">
+            <div class="label">Total Applications</div>
+            <div class="value">{{ total_applications }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        My Drives
+        <span class="badge pill-applied ms-2">{{ drives|length }}</span>
+    </div>
+    <div class="card-body" style="max-height:400px; overflow-y:auto;">
+        {% if drives %}
+            {% for d in drives %}
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                <div>
+                    <strong>#{{ d.id }} {{ d.job_title }}</strong>
+                    <span class="text-muted ms-2">{{ d.applications|length }} Applications</span>
+                    <span class="badge ms-2
+                        {% if d.status == 'Approved' %}pill-approved
+                        {% elif d.status == 'Pending' %}pill-pending
+                        {% elif d.status == 'Closed' %}pill-closed
+                        {% else %}pill-rejected{% endif %}">
+                        {{ d.status }}
+                    </span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('company_applicants', id=d.id) }}"
+                       class="btn btn-sm btn-outline-primary">Applicants</a>
+                    {% if d.status != 'Closed' %}
+                    <a href="{{ url_for('company_edit_drive', id=d.id) }}"
+                       class="btn btn-sm btn-outline-secondary">Edit</a>
+                    <a href="{{ url_for('company_close_drive', id=d.id) }}"
+                       class="btn btn-sm btn-outline-warning"
+                       onclick="return confirm('Close this drive?')">Close</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-box">
+                <i class="bi bi-briefcase"></i>
+                <p>No drives created yet. Click Create Drive to get started!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

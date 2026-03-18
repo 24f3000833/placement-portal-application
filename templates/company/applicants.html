@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">
+        Applicants — {{ drive.job_title }}
+        <small>{{ applications|length }} Total</small>
+    </h1>
+    <a href="{{ url_for('company_dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body" style="max-height:500px; overflow-y:auto;">
+        {% if applications %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Degree</th>
+                        <th>Branch</th>
+                        <th>CGPA</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ app.student.name }}</td>
+                        <td>{{ app.student.degree }}</td>
+                        <td>{{ app.student.branch }}</td>
+                        <td>{{ app.student.cgpa }}</td>
+                        <td>
+                            <span class="badge
+                                {% if app.status == 'Selected' %}pill-selected
+                                {% elif app.status == 'Shortlisted' %}pill-shortlisted
+                                {% elif app.status == 'Rejected' %}pill-rejected
+                                {% else %}pill-applied{% endif %}">
+                                {{ app.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('company_review_application', id=app.id) }}"
+                               class="btn btn-sm btn-outline-primary">Review</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-box">
+                <i class="bi bi-people"></i>
+                <p>No applicants yet</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

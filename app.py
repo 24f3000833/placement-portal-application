@@ -3,6 +3,7 @@ from models import db , Admin , Company , Student , PlacementDrive, Application
 from werkzeug.security import generate_password_hash , check_password_hash
 from werkzeug.utils import secure_filename
 import os
+from datetime import datetime , date
 
 
 app= Flask(__name__)
@@ -209,6 +210,7 @@ def admin_dashboard():
     all_students=Student.query.all()
     ongoing_drives=PlacementDrive.query.filter_by(status="Approved").all()
     all_applications = Application.query.order_by(Application.applied_at.desc()).limit(20).all()
+    pending_drives = PlacementDrive.query.filter_by(status="Pending").all()
 
 
     if search:
@@ -251,7 +253,8 @@ def admin_dashboard():
         all_students=all_students,
         ongoing_drives=ongoing_drives,
         search=search,
-        all_applications=all_applications
+        all_applications=all_applications ,
+        pending_drives=pending_drives
     )
 
 @app.route("/admin/company/<int:id>/approve")
@@ -413,11 +416,137 @@ def logout():
     flash("Logged out successfully","success")
     return redirect(url_for("login"))
 
+#####################################################################################
+
+### COMPANY ROUTESS ####
+#Company Dashboard
 @app.route("/company/dashboard")
-def company_dashboard():
-    return "Company Dashboard--COming soon..."
+def company_dashboard ():
+    if "user_id" not in session or session ["role"] != "company":
+        flash("Please login as Company", "danger")
+        return redirect(url_for(" login"))
+    company = Company.query.get(session["user_id"])
+    drives = PlacementDrive.query.filter_by(company_id=company.id).all()
+    total_drives = len(drives)
+    total_applications = sum(len(d.applications) for d in drives)
+    return render_template("company/dashboard.html",
+        company= company,
+        drives =drives,
+        total_drives=total_drives,
+        total_applications= total_applications
+    )
 
 
+@app.route("/company/drive/create", methods=["GET", "POST"])
+def company_create_drive():
+    if "user_id" not in session or session["role"] != "company":
+        flash("Please login as Company", "danger")
+        return redirect(url_for("login"))
+    company = Company.query.get(session["user_id"])
+    if request.method == "POST":
+        job_title =request.form.get("job_title", "")
+        job_description=request.form.get("job_description", "")
+        eligibility= request.form.get("eligibility", "")
+        salary = request.form.get("salary", "")
+        location= request.form.get("location", "")
+        deadline_str = request.form.get("deadline", "")
+        deadline =datetime.strptime(deadline_str, "%Y-%m-%d").date() if deadline_str else None
+        drive = PlacementDrive(
+            company_id=company.id,
+            job_title=job_title,
+            job_description=job_description,
+            eligibility=eligibility,
+            salary=salary,
+            location=location,
+            deadline=deadline,
+            status="Pending"
+        )
+        db.session.add(drive)
+        db.session.commit()
+        flash("Drive created! Waiting for admin approval.", "success")
+        return redirect(url_for("company_dashboard"))
+    return render_template("company/create_drive.html", company=company)
+
+
+@app.route("/company/drive/<int:id>/edit", methods=["GET", "POST"])
+def company_edit_drive(id):
+    if "user_id" not in session or session["role"] != "company":
+        flash("Please login as Company", "danger")
+        return redirect(url_for("login"))
+    company = Company.query.get(session["user_id"])
+    drive = PlacementDrive.query.get_or_404(id)
+    if drive.company_id != company.id:
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for("company_dashboard"))
+    if request.method == "POST":
+        drive.job_title = request.form.get ("job_title", "")
+        drive.job_description =request.form.get("job_description", "")
+        drive.eligibility=request.form.get("eligibility", "")
+        drive.salary = request.form.get("salary", "")
+        drive.location = request.form.get("location", "")
+        deadline_str= request.form.get("deadline", "")
+        drive.deadline=datetime.strptime(deadline_str, "%Y-%m-%d").date() if deadline_str else None
+        db.session.commit()
+        flash("Drive updated successfully!", "success")
+        return redirect(url_for("company_dashboard"))
+    return render_template ("company/edit_drive.html", company=company, drive=drive)
+
+
+@app.route("/company/drive/<int:id>/close")
+def company_close_drive(id):
+    if "user_id" not in session or session["role"] != "company":
+        flash("Please login as Company", "danger")
+        return redirect(url_for("login"))
+    company = Company.query.get(session["user_id"])
+    drive = PlacementDrive.query.get_or_404(id)
+    if drive.company_id!=company.id:
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for("company_dashboard" ) )
+    drive.status = "Closed"
+    db.session.commit()
+    flash("Drive closed successfully.", "info")
+    return redirect(url_for("company_dashboard") )
+
+
+@app.route("/company/drive/<int:id>/applicants")
+def company_applicants(id):
+    if "user_id" not in session or session["role"] != "company":
+        flash("Please login as Company", "danger")
+        return redirect(url_for("login"))
+    company = Company.query.get(session["user_id"])
+    drive = PlacementDrive.query.get_or_404(id)
+    if drive.company_id != company.id:
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for("company_dashboard"))
+    applications = Application.query.filter_by(drive_id=id).all()
+    return render_template("company/applicants.html",
+        company=company,
+        drive=drive,
+        applications=applications
+    )
+
+
+@app.route("/company/application/<int:id>/review", methods=["GET", "POST"])
+def company_review_application(id):
+    if "user_id" not in session or session["role"] != "company":
+        flash("Please login as Company", "danger")
+        return redirect(url_for("login"))
+    company = Company.query.get(session["user_id"])
+    application = Application.query.get_or_404(id)
+    if application.drive.company_id != company.id:
+        flash("Unauthorized access!", "danger")
+        return redirect(url_for("company_dashboard"))
+    if request.method == "POST":
+        application.status = request.form.get("status", "Applied")
+        db.session.commit()
+        flash("Application status updated!", "success")
+        return redirect(url_for("company_applicants", id=application.drive_id))
+    return render_template ("company/review_application.html",
+        company=company,
+        application=application
+    )
+
+#################################################################
 @app.route("/student/dashboard")
 def student_dashboard():
     return "Student--COming soon..."

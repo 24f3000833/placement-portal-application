@@ -28,11 +28,12 @@
         </div>
 
     {% elif session["role"] == "company" %}
-        <div class="nav-links">
-            <a href="{{ url_for('company_dashboard') }}"
-               class="{{ 'active' if request.endpoint == 'company_dashboard' }}">Dashboard</a>
-        </div>
+    <div class="nav-links">
+        <a href="{{ url_for('company_dashboard') }}"
+           class="{{ 'active' if request.endpoint == 'company_dashboard' }}">Dashboard</a>
+    </div>
 
+    
     {% elif session["role"] == "student" %}
         <div class="nav-links">
             <a href="{{ url_for('student_dashboard') }}"
