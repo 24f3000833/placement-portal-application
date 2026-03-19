@@ -56,8 +56,8 @@
             </tr>
         </table>
 
-        <a href="{{ url_for('static', filename='upload/certificates/' + company.certificate) }}"
-           target="_blank" class="btn btn-outline-primary">
+        <a href="{{ url_for('uploaded_certificate', filename=company.certificate) }}"
+            target="_blank" class="btn btn-outline-primary">
             <i class="bi bi-file-earmark-pdf"></i> View Certificate
         </a>
     </div>

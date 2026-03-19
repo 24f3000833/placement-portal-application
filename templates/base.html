@@ -28,17 +28,21 @@
         </div>
 
     {% elif session["role"] == "company" %}
-    <div class="nav-links">
-        <a href="{{ url_for('company_dashboard') }}"
-           class="{{ 'active' if request.endpoint == 'company_dashboard' }}">Dashboard</a>
-    </div>
+        <div class="nav-links">
+            <a href="{{ url_for('company_dashboard') }}"
+               class="{{ 'active' if request.endpoint == 'company_dashboard' }}">Dashboard</a>
+        </div>
 
-    
     {% elif session["role"] == "student" %}
         <div class="nav-links">
             <a href="{{ url_for('student_dashboard') }}"
                class="{{ 'active' if request.endpoint == 'student_dashboard' }}">Dashboard</a>
+            <a href="{{ url_for('student_applications') }}"
+               class="{{ 'active' if request.endpoint == 'student_applications' }}">My Applications</a>
+            <a href="{{ url_for('student_profile') }}"
+               class="{{ 'active' if request.endpoint == 'student_profile' }}">Profile</a>
         </div>
+
     {% endif %}
 
     <div class="nav-right">
@@ -64,7 +68,8 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-    {% block content %}{% endblock %}
+    {% block content %}
+    {% endblock %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>

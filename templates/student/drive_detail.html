@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">Drive Details</h1>
+    <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        {{ drive.job_title }} — {{ drive.company.name }}
+    </div>
+    <div class="card-body">
+        <table class="table table-borderless">
+            <tr>
+                <th style="width:25%">Company</th>
+                <td>{{ drive.company.name }}</td>
+            </tr>
+            <tr>
+                <th>Job Title</th>
+                <td>{{ drive.job_title }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ drive.job_description or "Not provided" }}</td>
+            </tr>
+            <tr>
+                <th>Eligibility</th>
+                <td>{{ drive.eligibility or "Not provided" }}</td>
+            </tr>
+            <tr>
+                <th>Salary</th>
+                <td>{{ drive.salary or "Not provided" }}</td>
+            </tr>
+            <tr>
+                <th>Location</th>
+                <td>{{ drive.location or "Not provided" }}</td>
+            </tr>
+            <tr>
+                <th>Deadline</th>
+                <td>{{ drive.deadline or "Not provided" }}</td>
+            </tr>
+        </table>
+
+        {% if existing %}
+            <div class="alert alert-info">
+                You have already applied for this drive.
+                Status: <strong>{{ existing.status }}</strong>
+            </div>
+        {% else %}
+            <form method="POST" action="{{ url_for('student_apply', id=drive.id) }}">
+                <button type="submit" class="btn btn-primary">Apply Now</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

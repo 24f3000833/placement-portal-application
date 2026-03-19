@@ -211,6 +211,7 @@ def admin_dashboard():
     ongoing_drives=PlacementDrive.query.filter_by(status="Approved").all()
     all_applications = Application.query.order_by(Application.applied_at.desc()).limit(20).all()
     pending_drives = PlacementDrive.query.filter_by(status="Pending").all()
+    all_drives = PlacementDrive.query.order_by(PlacementDrive.created_at.desc()).all()
 
 
     if search:
@@ -254,6 +255,7 @@ def admin_dashboard():
         ongoing_drives=ongoing_drives,
         search=search,
         all_applications=all_applications ,
+        all_drives=all_drives , 
         pending_drives=pending_drives
     )
 
@@ -395,17 +397,14 @@ def admin_drive_detail(id):
         applications=applications
     )
 
-def admin_drive_detail(id):
+@app.route("/admin/application/<int:id>")
+def admin_application_detail(id):
     if "user_id" not in session or session["role"] != "admin":
         flash("Please login as Admin", "danger")
         return redirect(url_for("admin_login"))
-    
-    drive = PlacementDrive.query.get_or_404(id)
-    applications = Application.query.filter_by(drive_id=id).all()
-    
-    return render_template("admin/drive_detail.html",
-        drive=drive,
-        applications=applications
+    application = Application.query.get_or_404(id)
+    return render_template("admin/application_detail.html",
+        application=application
     )
 #####################################################################################3
 
@@ -546,14 +545,114 @@ def company_review_application(id):
         application=application
     )
 
-#################################################################
+###   STUDENT AREAA!!  #######
 @app.route("/student/dashboard")
 def student_dashboard():
-    return "Student--COming soon..."
+    if "user_id" not in session or session["role"] != "student":
+        flash("Please login as Student", "danger")
+        return redirect(url_for("login"))
+    student = Student.query.get(session["user_id"])
+    approved_drives = PlacementDrive.query.filter_by(status="Approved").all()
+    applications = Application.query.filter_by(student_id=student.id).all()
+    return render_template("student/dashboard.html",
+        student=student,
+        approved_drives=approved_drives,
+        applications=applications
+    )
+
+
+@app.route("/student/drive/<int:id>")
+def student_drive_detail(id):
+    if "user_id" not in session or session["role"] != "student":
+        flash("Please login as Student", "danger")
+        return redirect(url_for("login"))
+    student = Student.query.get(session["user_id"])
+    drive = PlacementDrive.query.get_or_404(id)
+    existing = Application.query.filter_by(
+        student_id=student.id,
+        drive_id=id
+    ).first()
+    return render_template("student/drive_detail.html",
+        student=student,
+        drive=drive,
+        existing=existing
+    )
+
+
+@app.route("/student/drive/<int:id>/apply", methods=["POST"])
+def student_apply(id):
+    if "user_id" not in session or session["role"] != "student":
+        flash("Please login as Student", "danger")
+        return redirect(url_for("login"))
+    student = Student.query.get(session["user_id"])
+    drive = PlacementDrive.query.get_or_404(id)
+    existing = Application.query.filter_by(
+        student_id=student.id,
+        drive_id=id
+    ).first()
+    if existing:
+        flash("You have already applied for this drive!", "warning")
+        return redirect(url_for("student_dashboard"))
+    if drive.status != "Approved":
+        flash("This drive is not available!", "danger")
+        return redirect(url_for("student_dashboard"))
+    application = Application(
+        student_id=student.id,
+        drive_id=id,
+        status="Applied"
+    )
+    db.session.add(application)
+    db.session.commit()
+    flash("Applied successfully!", "success")
+    return redirect(url_for("student_applications"))
+
+
+@app.route("/student/applications")
+def student_applications():
+    if "user_id" not in session or session["role"] != "student":
+        flash("Please login as Student", "danger")
+        return redirect(url_for("login"))
+    student = Student.query.get(session["user_id"])
+    applications = Application.query.filter_by(student_id=student.id).all()
+    return render_template("student/applications.html",
+        student=student,
+        applications=applications
+    )
+
+
+@app.route("/student/profile", methods=["GET", "POST"])
+def student_profile():
+    if "user_id" not in session or session["role"] != "student":
+        flash("Please login as Student", "danger")
+        return redirect(url_for("login"))
+    student = Student.query.get(session["user_id"])
+    if request.method == "POST":
+        student.name = request.form.get("name", "")
+        student.phone = request.form.get("phone", "")
+        student.degree = request.form.get("degree", "")
+        student.branch = request.form.get("branch", "")
+        student.cgpa = float(request.form.get("cgpa", 0))
+        resume = request.files.get("resume")
+        if resume and resume.filename != "":
+            filename = secure_filename(resume.filename)
+            resume_folder = os.path.join(app.config["UPLOAD_FOLDER"], "resumes")
+            os.makedirs(resume_folder, exist_ok=True)
+            resume.save(os.path.join(resume_folder, filename))
+            student.resume = filename
+        db.session.commit()
+        flash("Profile updated successfully!", "success")
+        return redirect(url_for("student_profile"))
+    return render_template("student/profile.html", student=student)
+
+#########################################################3
 
 @app.route("/upload/resumes/<filename>")
 def uploaded_resume(filename):
     return send_from_directory("static/upload/resumes", filename)
+
+@app.route("/upload/certificates/<filename>")
+def uploaded_certificate(filename):
+    return send_from_directory("static/upload/certificates", filename)
 
 
 if __name__=="__main__":

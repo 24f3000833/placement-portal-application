@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title">Edit Profile</h1>
+    <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('student_profile') }}" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="name" class="form-control" value="{{ student.name }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Phone</label>
+                <input type="text" name="phone" class="form-control" value="{{ student.phone or '' }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Degree</label>
+                <select name="degree" class="form-select" required>
+                    <option value="B.Tech" {% if student.degree == 'B.Tech' %}selected{% endif %}>B.Tech</option>
+                    <option value="MBA" {% if student.degree == 'MBA' %}selected{% endif %}>MBA</option>
+                    <option value="MCA" {% if student.degree == 'MCA' %}selected{% endif %}>MCA</option>
+                    <option value="BCA" {% if student.degree == 'BCA' %}selected{% endif %}>BCA</option>
+                    <option value="B.Sc" {% if student.degree == 'B.Sc' %}selected{% endif %}>B.Sc</option>
+                    <option value="Other" {% if student.degree == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Branch</label>
+                <input type="text" name="branch" class="form-control" value="{{ student.branch }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">CGPA</label>
+                <input type="number" name="cgpa" class="form-control"
+                       value="{{ student.cgpa }}" step="0.01" min="0" max="10" required>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Resume</label>
+                <div class="mb-2">
+                    <span class="text-muted">Current: </span>
+                    <a href="{{ url_for('uploaded_resume', filename=student.resume) }}"
+                       target="_blank" class="subtle-link">{{ student.resume }}</a>
+                </div>
+                <input type="file" name="resume" class="form-control" accept=".pdf">
+                <div class="form-text" style="font-size:12px; color:var(--text-light)">
+                    Leave empty to keep current resume. PDF only.
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
