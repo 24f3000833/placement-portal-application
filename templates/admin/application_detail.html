@@ -1,92 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="page-title">Application Details</h1>
-    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Back
-    </a>
+<div class="d-flex justify-content-between mb-4">
+    <h4>Application Details</h4>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Back</a>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header">
-        Application Information
-    </div>
+<div class="card">
+    <div class="card-header fw-bold">Application Information</div>
     <div class="card-body">
-        <table class="table table-borderless">
-            <tr>
-                <th style="width:25%">Application ID</th>
-                <td>#{{ application.id }}</td>
-            </tr>
-            <tr>
-                <th>Student</th>
-                <td>
-                    <a href="{{ url_for('admin_student_detail', id=application.student.id) }}"
-                       class="subtle-link">{{ application.student.name }}</a>
-                </td>
-            </tr>
-            <tr>
-                <th>Degree</th>
-                <td>{{ application.student.degree }}</td>
-            </tr>
-            <tr>
-                <th>Branch</th>
-                <td>{{ application.student.branch }}</td>
-            </tr>
-            <tr>
-                <th>CGPA</th>
-                <td>{{ application.student.cgpa }}</td>
-            </tr>
-            <tr>
-                <th>Phone</th>
-                <td>{{ application.student.phone }}</td>
-            </tr>
-            <tr>
-                <th>Company</th>
-                <td>
-                    <a href="{{ url_for('admin_company_detail', id=application.drive.company.id) }}"
-                       class="subtle-link">{{ application.drive.company.name }}</a>
-                </td>
-            </tr>
-            <tr>
-                <th>Drive</th>
-                <td>
-                    <a href="{{ url_for('admin_drive_detail', id=application.drive.id) }}"
-                       class="subtle-link">{{ application.drive.job_title }}</a>
-                </td>
-            </tr>
-            <tr>
-                <th>Applied On</th>
-                <td>{{ application.applied_at.strftime("%d %b %Y") }}</td>
-            </tr>
+        <table class="table table-bordered">
+            <tr><th style="width:25%">Application ID</th><td>#{{ application.id }}</td></tr>
+            <tr><th>Student</th><td>{{ application.student.name }}</td></tr>
+            <tr><th>Degree</th><td>{{ application.student.degree }}</td></tr>
+            <tr><th>Branch</th><td>{{ application.student.branch }}</td></tr>
+            <tr><th>CGPA</th><td>{{ application.student.cgpa }}</td></tr>
+            <tr><th>Phone</th><td>{{ application.student.phone }}</td></tr>
+            <tr><th>Company</th><td>{{ application.drive.company.name }}</td></tr>
+            <tr><th>Drive</th><td>{{ application.drive.job_title }}</td></tr>
+            <tr><th>Applied On</th><td>{{ application.applied_at.strftime("%d %b %Y") }}</td></tr>
             <tr>
                 <th>Status</th>
                 <td>
-                    <span class="badge
-                        {% if application.status == 'Selected' %}pill-selected
-                        {% elif application.status == 'Shortlisted' %}pill-shortlisted
-                        {% elif application.status == 'Rejected' %}pill-rejected
-                        {% else %}pill-applied{% endif %}">
-                        {{ application.status }}
-                    </span>
+                    <span class="badge {% if application.status == 'Selected' %}bg-success{% elif application.status == 'Shortlisted' %}bg-warning text-dark{% elif application.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %}">{{ application.status }}</span>
                 </td>
             </tr>
         </table>
-
-        <a href="{{ url_for('uploaded_resume', filename=application.student.resume) }}"
-           target="_blank" class="btn btn-outline-primary">
-            <i class="bi bi-file-earmark-pdf"></i> View Resume
-        </a>
+        <a href="{{ url_for('uploaded_resume', filename=application.student.resume) }}" target="_blank" class="btn btn-outline-primary">View Resume</a>
     </div>
 </div>
 
-<div class="d-flex gap-2">
-    <a href="{{ url_for('admin_student_detail', id=application.student.id) }}"
-       class="btn btn-outline-primary">View Student</a>
-    <a href="{{ url_for('admin_drive_detail', id=application.drive.id) }}"
-       class="btn btn-outline-primary">View Drive</a>
-    <a href="{{ url_for('admin_dashboard') }}"
-       class="btn btn-outline-secondary">Back</a>
+<div class="mt-3">
+    <a href="{{ url_for('admin_student_detail', id=application.student.id) }}" class="btn btn-outline-primary">View Student</a>
+    <a href="{{ url_for('admin_drive_detail', id=application.drive.id) }}" class="btn btn-outline-primary">View Drive</a>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Back</a>
 </div>
 
 {% endblock %}

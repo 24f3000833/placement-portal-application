@@ -1,50 +1,45 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="auth-wrap">
-    <div class="auth-left">
-        <h1>Placify</h1>
-        <p>Register your company and start posting placement drives. Connect with talented students from top colleges.</p>
-    </div>
-    <div class="auth-right">
-        <div class="auth-box">
-            <h2>Company Registration</h2>
-            <p class="subtext">Fill in your company details to get started</p>
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-center fw-bold">Company Registration</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('register_company') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class= "form-label">Company Name</label>
+                        <input type =  "text" name="name" class="form-control" required>
+                    </div>
+                    
+                    <div class ="mb-3">
+                        <label class= "form-label">Email</label>
+                        <input type = "email" name="email" class="form-control" required>
+                    </div>
 
-            <form method="POST" action="{{ url_for('register_company') }}" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label class="form-label">Company Name</label>
-                    <input type="text" name="name" class="form-control" placeholder="Enter company name" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" name="email" class="form-control" placeholder="hr@company.com" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" class="form-control" placeholder="Enter password" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Website</label>
-                    <input type="text" name="website" class="form-control" placeholder="https://company.com">
-                </div>
-                <div class="mb-4">
-                    <label class="form-label">Company Certificate <span class="text-danger">*</span></label>
-                    <input type="file" name="certificate" class="form-control" accept=".pdf" required>
-                    <div class="form-text" style="font-size:12px; color:var(--text-light)">PDF only. Max 16MB.</div>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Register Company</button>
-            </form>
 
-            <hr class="my-4">
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class= "form-label">Website</label>
+                        <input type = "text" name="website" class ="form-control">
+                    </div>
 
-            <p class="text-center" style="font-size:13.5px; color:var(--text-light)">
-                Already have an account?
-                <a href="{{ url_for('login') }}" class="subtle-link">Sign in</a>
-            </p>
-            <p class="text-center" style="font-size:12px; color:var(--text-light)">
-                Your account will be activated after admin approval.
-            </p>
+                    <div class="mb-3">
+                        <label class="form-label">Certificate (PDF only) *</label>
+                        <input type="file" name="certificate" class="form-control" accept=".pdf" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Register</button>
+                </form>
+
+                <hr>
+
+
+                <p class="text-center">Already have account? <a href="{{ url_for('login') }}">Login</a></p>
+                <p class="text-center text-muted">Your account will be activated after admin approval.</p>
+            </div>
         </div>
     </div>
 </div>

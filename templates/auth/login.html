@@ -1,50 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="auth-wrap">
-    <div class="auth-left">
-        <h1>Placify</h1>
-        <p>Your complete campus placement portal. Connect students with top companies and manage the entire placement process in one place.</p>
-    </div>
-    <div class="auth-right">
-        <div class="auth-box">
-            <h2>Welcome</h2>
-            <p class="subtext">Sign in to your account to continue</p>
-
-            <form method="POST" action="{{ url_for('login') }}">
-                <div class="mb-3">
-                    <label class="form-label">Email address</label>
-                    <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" class="form-control" placeholder="Enter password" required>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label">Login as</label>
-                    <select name="role" class="form-select" required>
-                        <option value="" disabled selected>Select role</option>
-                        <option value="company">Company</option>
-                        <option value="student">Student</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Sign in</button>
-            </form>
-
-            <hr class="my-4">
-
-            <p class="text-center" style="font-size:13.5px; color:var(--text-light)">
-                New student?
-                <a href="{{ url_for('register_student') }}" class="subtle-link">Register here</a>
-            </p>
-            <p class="text-center" style="font-size:13.5px; color:var(--text-light)">
-                New company?
-                <a href="{{ url_for('register_company') }}" class="subtle-link">Register here</a>
-            </p>
-            <p class="text-center" style="font-size:13.5px; color:var(--text-light)">
-                Admin?
-                <a href="{{ url_for('admin_login') }}" class="subtle-link">Login here</a>
-            </p>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header text-center fw-bold">Placify — Login</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Login as</label>
+                        <select name="role" class="form-select" required>
+                            <option value="" disabled selected>Select role</option>
+                            <option value="company">Company</option>
+                            <option value="student">Student</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+                <hr>
+                <p class="text-center">New student? <a href="{{ url_for('register_student') }}">Register here</a></p>
+                <p class="text-center">New company? <a href="{{ url_for('register_company') }}">Register here</a></p>
+                <p class="text-center">Admin? <a href="{{ url_for('admin_login') }}">Login here</a></p>
+            </div>
         </div>
     </div>
 </div>

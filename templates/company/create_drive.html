@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="page-title">Create New Drive</h1>
-    <a href="{{ url_for('company_dashboard') }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Back
-    </a>
+<div class="d-flex justify-content-between mb-4">
+    <h4>Create New Drive</h4>
+    <a href="{{ url_for('company_dashboard') }}" class="btn btn-outline-secondary">Back</a>
 </div>
 
 <div class="card">
@@ -13,32 +11,30 @@
         <form method="POST" action="{{ url_for('company_create_drive') }}">
             <div class="mb-3">
                 <label class="form-label">Job Title</label>
-                <input type="text" name="job_title" class="form-control" placeholder="e.g. Software Engineer" required>
+                <input type="text" name="job_title" class="form-control" required>
             </div>
             <div class="mb-3">
                 <label class="form-label">Job Description</label>
-                <textarea name="job_description" class="form-control" rows="3" placeholder="Describe the role..."></textarea>
+                <textarea name="job_description" class="form-control" rows="3"></textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label">Eligibility</label>
-                <textarea name="eligibility" class="form-control" rows="2" placeholder="e.g. B.Tech CSE, Min CGPA 7.0"></textarea>
+                <textarea name="eligibility" class="form-control" rows="2"></textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label">Salary</label>
-                <input type="text" name="salary" class="form-control" placeholder="e.g. 12 LPA">
+                <input type="text" name="salary" class="form-control">
             </div>
             <div class="mb-3">
                 <label class="form-label">Location</label>
-                <input type="text" name="location" class="form-control" placeholder="e.g. Bangalore">
+                <input type="text" name="location" class="form-control">
             </div>
-            <div class="mb-4">
-                <label class="form-label">Application Deadline</label>
+            <div class="mb-3">
+                <label class="form-label">Deadline</label>
                 <input type="date" name="deadline" class="form-control">
             </div>
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Save Drive</button>
-                <a href="{{ url_for('company_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
-            </div>
+            <button type="submit" class="btn btn-primary">Save Drive</button>
+            <a href="{{ url_for('company_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
         </form>
     </div>
 </div>

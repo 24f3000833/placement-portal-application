@@ -1,332 +1,200 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 class="page-title">Dashboard</h1>
+<h4 class="mb-4">Admin Dashboard</h4>
 
-<div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-        <div class="stat-tile">
-            <div class="label">Students</div>
-            <div class="value">{{ total_students }}</div>
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h3 class="text-primary">{{ total_students }}</h3>
+            <p class="text-muted">Students</p>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-tile">
-            <div class="label">Companies</div>
-            <div class="value">{{ total_companies }}</div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h3 class="text-success">{{ total_companies }}</h3>
+            <p class="text-muted">Companies</p>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-tile">
-            <div class="label">Drives</div>
-            <div class="value">{{ total_drives }}</div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h3 class="text-warning">{{ total_drives }}</h3>
+            <p class="text-muted">Drives</p>
         </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="stat-tile">
-            <div class="label">Applications</div>
-            <div class="value">{{ total_applications }}</div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <h3 class="text-danger">{{ total_applications }}</h3>
+            <p class="text-muted">Applications</p>
         </div>
     </div>
 </div>
 
 {% if search %}
 
-<div class="card mb-4">
-    <div class="card-header">
-        Search Results for "{{ search }}"
-    </div>
-    <div class="card-body" style="max-height:350px; overflow-y:auto;">
+<div class="card">
+    <div class="card-header fw-bold">Search Results for "{{ search }}"</div>
+    <div class="card-body scrollable">
         {% set company_results = pending_companies + all_companies %}
         {% if company_results %}
-            <p class="section-label">Companies</p>
+            <p class="text-muted fw-bold">Companies</p>
             {% for c in company_results %}
-            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div class="d-flex justify-content-between border-bottom py-2">
                 <div>
-                    <strong>#{{ c.id }} {{ c.name }}</strong>
-                    <span class="text-muted ms-2">{{ c.email }}</span>
-                    <span class="badge ms-2
-                        {% if c.approval_status == 'Approved' %}pill-approved
-                        {% elif c.approval_status == 'Pending' %}pill-pending
-                        {% else %}pill-rejected{% endif %}">
-                        {{ c.approval_status }}
-                    </span>
-                    {% if c.is_blacklisted %}
-                        <span class="badge pill-rejected ms-1">Blacklisted</span>
-                    {% endif %}
+                    <strong>#{{ c.id }} {{ c.name }}</strong> | {{ c.email }}
+                    <span class="badge {% if c.approval_status == 'Approved' %}bg-success{% elif c.approval_status == 'Pending' %}bg-warning text-dark{% else %}bg-danger{% endif %} ms-1">{{ c.approval_status }}</span>
+                    {% if c.is_blacklisted %}<span class="badge bg-dark ms-1">Blacklisted</span>{% endif %}
                 </div>
-                <a href="{{ url_for('admin_company_detail', id=c.id) }}"
-                   class="btn btn-sm btn-outline-primary">View Details</a>
+                <a href="{{ url_for('admin_company_detail', id=c.id) }}" class="btn btn-sm btn-outline-primary">View</a>
             </div>
             {% endfor %}
         {% endif %}
-
         {% if all_students %}
-            <p class="section-label mt-3">Students</p>
+            <p class="text-muted fw-bold mt-3">Students</p>
             {% for s in all_students %}
-            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div class="d-flex justify-content-between border-bottom py-2">
                 <div>
-                    <strong>#{{ s.id }} {{ s.name }}</strong>
-                    <span class="text-muted ms-2">{{ s.degree }} | {{ s.branch }} | CGPA: {{ s.cgpa }}</span>
-                    {% if s.is_blacklisted %}
-                        <span class="badge pill-rejected ms-1">Blacklisted</span>
-                    {% endif %}
+                    <strong>#{{ s.id }} {{ s.name }}</strong> | {{ s.degree }} | {{ s.branch }} | CGPA: {{ s.cgpa }}
+                    {% if s.is_blacklisted %}<span class="badge bg-dark ms-1">Blacklisted</span>{% endif %}
                 </div>
-                <a href="{{ url_for('admin_student_detail', id=s.id) }}"
-                   class="btn btn-sm btn-outline-primary">View Details</a>
+                <a href="{{ url_for('admin_student_detail', id=s.id) }}" class="btn btn-sm btn-outline-primary">View</a>
             </div>
             {% endfor %}
         {% endif %}
-
         {% if not company_results and not all_students %}
-            <div class="empty-box">
-                <i class="bi bi-search"></i>
-                <p>No results found for "{{ search }}"</p>
-            </div>
+            <p class="text-muted">No results found.</p>
         {% endif %}
     </div>
 </div>
 
 {% else %}
 
-<div class="card mb-4">
-    <div class="card-header">
-        Pending Company Approvals
-        <span class="badge pill-pending ms-2">{{ pending_companies|length }}</span>
-    </div>
-    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+<div class="card">
+    <div class="card-header fw-bold">Pending Company Approvals ({{ pending_companies|length }})</div>
+    <div class="card-body scrollable">
         {% if pending_companies %}
             {% for c in pending_companies %}
-            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div class="d-flex justify-content-between border-bottom py-2">
+                <div><strong>#{{ c.id }} {{ c.name }}</strong> | {{ c.email }}</div>
                 <div>
-                    <strong>#{{ c.id }} {{ c.name }}</strong>
-                    <span class="text-muted ms-2">{{ c.email }}</span>
-                    {% if c.website %}
-                    <a href="{{ c.website }}" target="_blank" class="subtle-link ms-2">{{ c.website }}</a>
-                    {% endif %}
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ url_for('uploaded_certificate', filename=c.certificate) }}"
-                       target="_blank" class="btn btn-sm btn-outline-secondary">Certificate</a>
-                    <a href="{{ url_for('admin_company_detail', id=c.id) }}"
-                       class="btn btn-sm btn-outline-primary">View Details</a>
-                    <a href="{{ url_for('approve_company', id=c.id) }}"
-                       class="btn btn-sm btn-outline-success">Approve</a>
-                    <a href="{{ url_for('reject_company', id=c.id) }}"
-                       class="btn btn-sm btn-outline-danger"
-                       onclick="return confirm('Reject and delete {{ c.name }}?')">Reject</a>
+                    <a href="{{ url_for('uploaded_certificate', filename=c.certificate) }}" target="_blank" class="btn btn-sm btn-outline-secondary">Certificate</a>
+                    <a href="{{ url_for('admin_company_detail', id=c.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                    <a href="{{ url_for('approve_company', id=c.id) }}" class="btn btn-sm btn-success">Approve</a>
+                    <a href="{{ url_for('reject_company', id=c.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Reject {{ c.name }}?')">Reject</a>
                 </div>
             </div>
             {% endfor %}
         {% else %}
-            <div class="empty-box">
-                <i class="bi bi-check-circle"></i>
-                <p>No pending approvals</p>
-            </div>
+            <p class="text-muted">No pending approvals.</p>
         {% endif %}
     </div>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header">
-        Pending Drive Approvals
-        <span class="badge pill-pending ms-2">{{ pending_drives|length }}</span>
-    </div>
-    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+<div class="card">
+    <div class="card-header fw-bold">Pending Drive Approvals ({{ pending_drives|length }})</div>
+    <div class="card-body scrollable">
         {% if pending_drives %}
             {% for d in pending_drives %}
-            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div class="d-flex justify-content-between border-bottom py-2">
+                <div><strong>#{{ d.id }} {{ d.job_title }}</strong> | {{ d.company.name }}</div>
                 <div>
-                    <strong>#{{ d.id }} {{ d.job_title }}</strong>
-                    <span class="text-muted ms-2">{{ d.company.name }}</span>
-                    {% if d.salary %}
-                    <span class="text-muted ms-2">{{ d.salary }}</span>
-                    {% endif %}
-                </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ url_for('admin_drive_detail', id=d.id) }}"
-                       class="btn btn-sm btn-outline-primary">View Details</a>
-                    <a href="{{ url_for('approve_drive', id=d.id) }}"
-                       class="btn btn-sm btn-outline-success">Approve</a>
-                    <a href="{{ url_for('reject_drive', id=d.id) }}"
-                       class="btn btn-sm btn-outline-danger">Reject</a>
+                    <a href="{{ url_for('admin_drive_detail', id=d.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                    <a href="{{ url_for('approve_drive', id=d.id) }}" class="btn btn-sm btn-success">Approve</a>
+                    <a href="{{ url_for('reject_drive', id=d.id) }}" class="btn btn-sm btn-danger">Reject</a>
                 </div>
             </div>
             {% endfor %}
         {% else %}
-            <div class="empty-box">
-                <i class="bi bi-check-circle"></i>
-                <p>No pending drive approvals</p>
-            </div>
+            <p class="text-muted">No pending drive approvals.</p>
         {% endif %}
     </div>
 </div>
 
-
-
-<div class="card mb-4">
-    <div class="card-header">
-        Registered Companies
-        <span class="badge pill-approved ms-2">{{ all_companies|length }}</span>
-    </div>
-    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+<div class="card">
+    <div class="card-header fw-bold">Registered Companies ({{ all_companies|length }})</div>
+    <div class="card-body scrollable">
         {% if all_companies %}
             {% for c in all_companies %}
-            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div class="d-flex justify-content-between border-bottom py-2">
                 <div>
-                    <strong>#{{ c.id }} {{ c.name }}</strong>
-                    <span class="text-muted ms-2">{{ c.email }}</span>
-                    <span class="badge pill-approved ms-2">Approved</span>
-                    {% if c.is_blacklisted %}
-                        <span class="badge pill-rejected ms-1">Blacklisted</span>
-                    {% endif %}
+                    <strong>#{{ c.id }} {{ c.name }}</strong> | {{ c.email }}
+                    <span class="badge bg-success ms-1">Approved</span>
+                    {% if c.is_blacklisted %}<span class="badge bg-dark ms-1">Blacklisted</span>{% endif %}
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ url_for('admin_company_detail', id=c.id) }}"
-                       class="btn btn-sm btn-outline-primary">View Details</a>
-                    <a href="{{ url_for('blacklist_company', id=c.id) }}"
-                       class="btn btn-sm {% if c.is_blacklisted %}btn-outline-success{% else %}btn-outline-danger{% endif %}">
+                <div>
+                    <a href="{{ url_for('admin_company_detail', id=c.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                    <a href="{{ url_for('blacklist_company', id=c.id) }}" class="btn btn-sm {% if c.is_blacklisted %}btn-outline-success{% else %}btn-outline-danger{% endif %}">
                         {% if c.is_blacklisted %}Unblacklist{% else %}Blacklist{% endif %}
                     </a>
                 </div>
             </div>
             {% endfor %}
         {% else %}
-            <div class="empty-box">
-                <i class="bi bi-building"></i>
-                <p>No companies registered yet</p>
-            </div>
+            <p class="text-muted">No companies registered yet.</p>
         {% endif %}
     </div>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header">
-        Registered Students
-        <span class="badge pill-applied ms-2">{{ all_students|length }}</span>
-    </div>
-    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+<div class="card">
+    <div class="card-header fw-bold">Registered Students ({{ all_students|length }})</div>
+    <div class="card-body scrollable">
         {% if all_students %}
             {% for s in all_students %}
-            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div class="d-flex justify-content-between border-bottom py-2">
                 <div>
-                    <strong>#{{ s.id }} {{ s.name }}</strong>
-                    <span class="text-muted ms-2">{{ s.degree }} | {{ s.branch }} | CGPA: {{ s.cgpa }}</span>
-                    {% if s.is_blacklisted %}
-                        <span class="badge pill-rejected ms-1">Blacklisted</span>
-                    {% endif %}
+                    <strong>#{{ s.id }} {{ s.name }}</strong> | {{ s.degree }} | {{ s.branch }} | CGPA: {{ s.cgpa }}
+                    {% if s.is_blacklisted %}<span class="badge bg-dark ms-1">Blacklisted</span>{% endif %}
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ url_for('admin_student_detail', id=s.id) }}"
-                       class="btn btn-sm btn-outline-primary">View Details</a>
-                    <a href="{{ url_for('blacklist_student', id=s.id) }}"
-                       class="btn btn-sm {% if s.is_blacklisted %}btn-outline-success{% else %}btn-outline-warning{% endif %}">
+                <div>
+                    <a href="{{ url_for('admin_student_detail', id=s.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                    <a href="{{ url_for('blacklist_student', id=s.id) }}" class="btn btn-sm {% if s.is_blacklisted %}btn-outline-success{% else %}btn-outline-warning{% endif %}">
                         {% if s.is_blacklisted %}Unblacklist{% else %}Blacklist{% endif %}
                     </a>
-                    <a href="{{ url_for('delete_student', id=s.id) }}"
-                       class="btn btn-sm btn-outline-danger"
-                       onclick="return confirm('Delete {{ s.name }}? This cannot be undone!')">Delete</a>
+                    <a href="{{ url_for('delete_student', id=s.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete {{ s.name }}?')">Delete</a>
                 </div>
             </div>
             {% endfor %}
         {% else %}
-            <div class="empty-box">
-                <i class="bi bi-people"></i>
-                <p>No students registered yet</p>
-            </div>
+            <p class="text-muted">No students registered yet.</p>
         {% endif %}
     </div>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header">
-        Ongoing Drives
-        <span class="badge pill-approved ms-2">{{ ongoing_drives|length }}</span>
-    </div>
-    <div class="card-body" style="max-height:250px; overflow-y:auto;">
-        {% if ongoing_drives %}
-            {% for d in ongoing_drives %}
-            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
-                <div>
-                    <strong>#{{ d.id }} {{ d.job_title }}</strong>
-                    <span class="text-muted ms-2">{{ d.company.name }}</span>
-                    <span class="text-muted ms-2">{{ d.applications|length }} Applications</span>
-                </div>
-                <a href="{{ url_for('admin_drive_detail', id=d.id) }}"
-                   class="btn btn-sm btn-outline-primary">View Details</a>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="empty-box">
-                <i class="bi bi-briefcase"></i>
-                <p>No ongoing drives</p>
-            </div>
-        {% endif %}
-    </div>
-</div>
-<div class="card mb-4">
-    <div class="card-header">
-        All Drives
-        <span class="badge pill-applied ms-2">{{ all_drives|length }}</span>
-    </div>
-    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+<div class="card">
+    <div class="card-header fw-bold">All Drives ({{ all_drives|length }})</div>
+    <div class="card-body scrollable">
         {% if all_drives %}
             {% for d in all_drives %}
-            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div class="d-flex justify-content-between border-bottom py-2">
                 <div>
-                    <strong>#{{ d.id }} {{ d.job_title }}</strong>
-                    <span class="text-muted ms-2">{{ d.company.name }}</span>
-                    <span class="badge ms-2
-                        {% if d.status == 'Approved' %}pill-approved
-                        {% elif d.status == 'Pending' %}pill-pending
-                        {% elif d.status == 'Closed' %}pill-closed
-                        {% else %}pill-rejected{% endif %}">
-                        {{ d.status }}
-                    </span>
-                    <span class="text-muted ms-2">{{ d.applications|length }} Applications</span>
+                    <strong>#{{ d.id }} {{ d.job_title }}</strong> | {{ d.company.name }}
+                    <span class="badge {% if d.status == 'Approved' %}bg-success{% elif d.status == 'Pending' %}bg-warning text-dark{% elif d.status == 'Closed' %}bg-secondary{% else %}bg-danger{% endif %} ms-1">{{ d.status }}</span>
+                    | {{ d.applications|length }} Applications
                 </div>
-                <a href="{{ url_for('admin_drive_detail', id=d.id) }}"
-                   class="btn btn-sm btn-outline-primary">View Details</a>
+                <a href="{{ url_for('admin_drive_detail', id=d.id) }}" class="btn btn-sm btn-outline-primary">View</a>
             </div>
             {% endfor %}
         {% else %}
-            <div class="empty-box">
-                <i class="bi bi-briefcase"></i>
-                <p>No drives yet</p>
-            </div>
+            <p class="text-muted">No drives yet.</p>
         {% endif %}
     </div>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header">
-        Recent Applications
-        <span class="badge pill-applied ms-2">{{ all_applications|length }}</span>
-    </div>
-    <div class="card-body" style="max-height:250px; overflow-y:auto;">
+<div class="card">
+    <div class="card-header fw-bold">Recent Applications ({{ all_applications|length }})</div>
+    <div class="card-body scrollable">
         {% if all_applications %}
             {% for a in all_applications %}
-            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div class="d-flex justify-content-between border-bottom py-2">
                 <div>
-                    <strong>{{ a.student.name }}</strong>
-                    <span class="text-muted ms-2">{{ a.drive.job_title }} | {{ a.drive.company.name }}</span>
-                    <span class="badge ms-2
-                        {% if a.status == 'Selected' %}pill-selected
-                        {% elif a.status == 'Shortlisted' %}pill-shortlisted
-                        {% elif a.status == 'Rejected' %}pill-rejected
-                        {% else %}pill-applied{% endif %}">
-                        {{ a.status }}
-                    </span>
+                    <strong>{{ a.student.name }}</strong> | {{ a.drive.job_title }} | {{ a.drive.company.name }}
+                    <span class="badge {% if a.status == 'Selected' %}bg-success{% elif a.status == 'Shortlisted' %}bg-warning text-dark{% elif a.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %} ms-1">{{ a.status }}</span>
                 </div>
-                <a href="{{ url_for('admin_application_detail', id=a.id) }}"
-                   class="btn btn-sm btn-outline-primary">View Details</a>
+                <a href="{{ url_for('admin_application_detail', id=a.id) }}" class="btn btn-sm btn-outline-primary">View</a>
             </div>
             {% endfor %}
         {% else %}
-            <div class="empty-box">
-                <i class="bi bi-file-text"></i>
-                <p>No applications yet</p>
-            </div>
+            <p class="text-muted">No applications yet.</p>
         {% endif %}
     </div>
 </div>
