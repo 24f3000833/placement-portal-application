@@ -9,7 +9,7 @@ with app.app_context():
 
     if not admin:
         hashed_pass=generate_password_hash("admin123")
-        admin=Admin(username="admin",password=hashed_pass)
+        admin=Admin(username="admin",password=hashed_pass) #Stores admin detail in admin table
         db.session.add(admin)
         db.session.commit()
         print("Databse created Successfully...\nPrint Admin account created..")

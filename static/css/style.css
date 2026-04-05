@@ -1,5 +1,5 @@
 body {
-    background-color: #f8f9fa;
+    background-color: whitesmoke;
 }
 
 .navbar-brand {
@@ -10,6 +10,7 @@ body {
 .card {
     margin-bottom: 20px;
 }
+
 
 .scrollable {
     max-height: 250px;

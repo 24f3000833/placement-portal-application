@@ -11,7 +11,7 @@ app.config["SECRET_KEY"]="placementportaljan26"  #USed to encrypt session data a
 app.config["SQLALCHEMY_DATABASE_URI"]= "sqlite:///placement.db"  #CReate placement.db file and store all 5 tables 
 app.config["SQLALCHEMY_TRACK_MODIFICATION"]=False  #Removes unneccessary features and saves memory anbd time
 app.config["UPLOAD_FOLDER"]="static/upload"  #Stores the uploaded file (certificate and resumnes)
-app.config["MAX_CONTENT_LENGTH"]=16*1024*1024   #Max file upload size = 16MB
+app.config["MAX_CONTENT_LENGTH"]=16*1024*1024   #Max file upload size = 16MB 
 
 
 db.init_app(app)
@@ -406,6 +406,8 @@ def admin_application_detail(id):
     return render_template("admin/application_detail.html",
         application=application
     )
+
+
 #####################################################################################3
 
 #LogOut
@@ -423,7 +425,7 @@ def logout():
 def company_dashboard ():
     if "user_id" not in session or session ["role"] != "company":
         flash("Please login as Company", "danger")
-        return redirect(url_for(" login"))
+        return redirect(url_for("login"))
     company = Company.query.get(session["user_id"])
     drives = PlacementDrive.query.filter_by(company_id=company.id).all()
     total_drives = len(drives)
@@ -435,7 +437,7 @@ def company_dashboard ():
         total_applications= total_applications
     )
 
-
+#Create placement drive
 @app.route("/company/drive/create", methods=["GET", "POST"])
 def company_create_drive():
     if "user_id" not in session or session["role"] != "company":
@@ -467,6 +469,7 @@ def company_create_drive():
     return render_template("company/create_drive.html", company=company)
 
 
+#Edit drive details
 @app.route("/company/drive/<int:id>/edit", methods=["GET", "POST"])
 def company_edit_drive(id):
     if "user_id" not in session or session["role"] != "company":
@@ -490,7 +493,7 @@ def company_edit_drive(id):
         return redirect(url_for("company_dashboard"))
     return render_template ("company/edit_drive.html", company=company, drive=drive)
 
-
+#Close Drive
 @app.route("/company/drive/<int:id>/close")
 def company_close_drive(id):
     if "user_id" not in session or session["role"] != "company":
@@ -506,7 +509,7 @@ def company_close_drive(id):
     flash("Drive closed successfully.", "info")
     return redirect(url_for("company_dashboard") )
 
-
+#View applicants of particular drive
 @app.route("/company/drive/<int:id>/applicants")
 def company_applicants(id):
     if "user_id" not in session or session["role"] != "company":
@@ -524,7 +527,7 @@ def company_applicants(id):
         applications=applications
     )
 
-
+#Riview applications on particular drive
 @app.route("/company/application/<int:id>/review", methods=["GET", "POST"])
 def company_review_application(id):
     if "user_id" not in session or session["role"] != "company":
@@ -545,7 +548,9 @@ def company_review_application(id):
         application=application
     )
 
-###   STUDENT AREAA!!  #######
+###   STUDENT WORk!!  #######
+
+#Student dashboard
 @app.route("/student/dashboard")
 def student_dashboard():
     if "user_id" not in session or session["role"] != "student":
@@ -560,7 +565,7 @@ def student_dashboard():
         applications=applications
     )
 
-
+#Student drive details
 @app.route("/student/drive/<int:id>")
 def student_drive_detail(id):
     if "user_id" not in session or session["role"] != "student":
@@ -578,7 +583,7 @@ def student_drive_detail(id):
         existing=existing
     )
 
-
+#Apply to drives
 @app.route("/student/drive/<int:id>/apply", methods=["POST"])
 def student_apply(id):
     if "user_id" not in session or session["role"] != "student":
@@ -606,7 +611,7 @@ def student_apply(id):
     flash("Applied successfully!", "success")
     return redirect(url_for("student_applications"))
 
-
+#View your applicationss
 @app.route("/student/applications")
 def student_applications():
     if "user_id" not in session or session["role"] != "student":
@@ -619,7 +624,7 @@ def student_applications():
         applications=applications
     )
 
-
+#Edit profile
 @app.route("/student/profile", methods=["GET", "POST"])
 def student_profile():
     if "user_id" not in session or session["role"] != "student":

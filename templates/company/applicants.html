@@ -3,11 +3,11 @@
 
 <div class="d-flex justify-content-between mb-4">
     <h4>Applicants — {{ drive.job_title }} ({{ applications|length }})</h4>
-    <a href="{{ url_for('company_dashboard') }}" class="btn btn-outline-secondary">Back</a>
+    <a href="{{ url_for('company_dashboard') }}" class= "btn btn-outline-secondary">Back</a>
 </div>
 
-<div class="card">
-    <div class="card-body">
+<div class ="card">
+    <div class= "card-body">
         {% if applications %}
             <table class="table table-bordered">
                 <thead>
@@ -40,8 +40,9 @@
                 </tbody>
             </table>
         {% else %}
-            <p class="text-muted">No applicants yet.</p>
+            <p class = "text-muted">No applicants yet</p>
         {% endif %}
+        
     </div>
 </div>
 

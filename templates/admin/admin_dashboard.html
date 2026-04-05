@@ -10,18 +10,22 @@
             <p class="text-muted">Students</p>
         </div>
     </div>
+
     <div class="col-md-3">
         <div class="card text-center p-3">
             <h3 class="text-success">{{ total_companies }}</h3>
             <p class="text-muted">Companies</p>
         </div>
     </div>
+
+
     <div class="col-md-3">
         <div class="card text-center p-3">
             <h3 class="text-warning">{{ total_drives }}</h3>
             <p class="text-muted">Drives</p>
         </div>
     </div>
+
     <div class="col-md-3">
         <div class="card text-center p-3">
             <h3 class="text-danger">{{ total_applications }}</h3>
@@ -49,6 +53,8 @@
             </div>
             {% endfor %}
         {% endif %}
+
+
         {% if all_students %}
             <p class="text-muted fw-bold mt-3">Students</p>
             {% for s in all_students %}
@@ -61,6 +67,8 @@
             </div>
             {% endfor %}
         {% endif %}
+
+        
         {% if not company_results and not all_students %}
             <p class="text-muted">No results found.</p>
         {% endif %}

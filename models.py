@@ -8,7 +8,7 @@ db = SQLAlchemy()
 class Admin(db.Model):
     __tablename__="admin"
     id=db.Column(db.Integer , primary_key=True)
-    username=db.Column(db.String(50),unique=True,nullable=False)
+    username=db.Column(db.String(50),unique=True,nullable = False )
     password=db.Column(db.String(250),nullable=False)
 
 #Company table
@@ -33,15 +33,15 @@ class Student(db.Model):
     name=db.Column(db.String(100),nullable=False)
     email=db.Column(db.String(100), unique=True , nullable=False)
     password=db.Column(db.String(250),nullable=False)
-    phone=db.Column(db.String(20))
-    degree=db.Column(db.String(50), nullable=False)
+    phone= db.Column(db.String(20))
+    degree=db.Column(db.String(50), nullable=False )
     branch=db.Column(db.String(50), nullable=False)
-    cgpa=db.Column(db.Float, nullable=False)
+    cgpa =db.Column(db.Float, nullable=False)
     resume=db.Column(db.String(200), nullable=False)
     is_blacklisted = db.Column(db.Boolean, default=False)
     created_at= db.Column(db.DateTime , default=datetime.utcnow)
 
-    applications=db.relationship("Application",backref="student", lazy=True)
+    applications=db.relationship("Application",backref ="student", lazy=True)
 
 
 
@@ -54,10 +54,10 @@ class PlacementDrive(db.Model):
     job_description=db.Column(db.Text)
     eligibility=db.Column(db.Text)
     salary= db.Column(db.String(50))
-    location=db.Column(db.String(200))
+    location =db.Column(db.String(200))
     deadline = db.Column(db.Date)
     status= db.Column(db.String(25), default="Pending")
-    created_at=db.Column(db.DateTime , default=datetime.utcnow)
+    created_at=db.Column(db.DateTime ,  default=datetime.utcnow)
 
 
     applications=db.relationship("Application" , backref="drive" , lazy =  True)
@@ -71,7 +71,7 @@ class Application(db.Model):
     applied_at=db.Column(db.DateTime, default=datetime.utcnow)
     status=db.Column(db.String(25), default="Applied")
 
-    __table_args__=(db.UniqueConstraint("student_id","drive_id",name="unique_application"),)
+    __table_args__=(db.UniqueConstraint("student_id","drive_id",name="unique_application"), ) 
 
     
 

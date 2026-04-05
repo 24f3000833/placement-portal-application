@@ -6,12 +6,14 @@
     <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">Back</a>
 </div>
 
-<div class="card">
+<div class ="card">
+
     <div class="card-body">
         {% if applications %}
             <table class="table table-bordered">
                 <thead>
                     <tr>
+
                         <th>#</th>
                         <th>Drive</th>
                         <th>Company</th>
@@ -27,16 +29,19 @@
                         <td>{{ app.drive.company.name }}</td>
                         <td>{{ app.applied_at.strftime("%d %b %Y") }}</td>
                         <td>
+
                             <span class="badge {% if app.status == 'Selected' %}bg-success{% elif app.status == 'Shortlisted' %}bg-warning text-dark{% elif app.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %}">{{ app.status }}</span>
+
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p class="text-muted">No applications yet.</p>
+            <p class= "text-muted">No applications yet.</p>
         {% endif %}
     </div>
 </div>
+
 
 {% endblock %}
