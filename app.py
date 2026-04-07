@@ -9,7 +9,7 @@ from datetime import datetime , date
 app= Flask(__name__)
 app.config["SECRET_KEY"]="placementportaljan26"  #USed to encrypt session data and keeps login into safe
 app.config["SQLALCHEMY_DATABASE_URI"]= "sqlite:///placement.db"  #CReate placement.db file and store all 5 tables 
-app.config["SQLALCHEMY_TRACK_MODIFICATION"]=False  #Removes unneccessary features and saves memory anbd time
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False  #Removes unneccessary features and saves memory anbd time
 app.config["UPLOAD_FOLDER"]="static/upload"  #Stores the uploaded file (certificate and resumnes)
 app.config["MAX_CONTENT_LENGTH"]=16*1024*1024   #Max file upload size = 16MB 
 
@@ -278,7 +278,7 @@ def reject_company(id):
     name=company.name
     db.session.delete(company)
     db.session.commit()
-    flash(f"{company.name} has been rejected", "warning")
+    flash(f"{name} has been rejected", "warning")
     return redirect(url_for("admin_dashboard"))
 
 
