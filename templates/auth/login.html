@@ -1,37 +1,105 @@
 {% extends "base.html" %}
-{% block content %}
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header text-center fw-bold">Placify — Login</div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('login') }}">
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Login as</label>
-                        <select name="role" class="form-select" required>
-                            <option value="" disabled selected>Select role</option>
-                            <option value="company">Company</option>
-                            <option value="student">Student</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Login</button>
-                </form>
-                <hr>
-                <p class="text-center">New student? <a href="{{ url_for('register_student') }}">Register here</a></p>
-                <p class="text-center">New company? <a href="{{ url_for('register_company') }}">Register here</a></p>
-                <p class="text-center">Admin? <a href="{{ url_for('admin_login') }}">Login here</a></p>
+{% block full_page %}
+<div class="login-page-body">
+    <div class="login-wrapper">
+
+        <div class="login-left">
+            <div class="login-logo">
+                <div class="login-logo-icon">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+                <span class="login-logo-text">Placify</span>
             </div>
+
+            <div class="login-hero">
+                <h2>Your campus<br>placement portal</h2>
+                <p>Connect with top companies.<br>Track drives, apply, and get placed.</p>
+            </div>
+
+            <div class="login-stats">
+                <div class="login-stat-pill">
+                    <span class="stat-dot" style="background-color: #22c55e;"></span>
+                    <span>Active drives</span>
+                    <strong>Live now</strong>
+                </div>
+                <div class="login-stat-pill">
+                    <span class="stat-dot" style="background-color: #6366f1;"></span>
+                    <span>Companies registered</span>
+                    <strong>Approved</strong>
+                </div>
+                <div class="login-stat-pill">
+                    <span class="stat-dot" style="background-color: #f59e0b;"></span>
+                    <span>Applications this month</span>
+                    <strong>Growing</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="login-right">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <h3>Welcome back</h3>
+            <p class="login-subtitle">Sign in to continue to Placify</p>
+
+            <form method="POST" action="{{ url_for('login') }}">
+
+                <div class="role-toggle">
+                    <input type="radio" name="role" id="role-student" value="student" checked>
+                    <label for="role-student">
+                        <i class="bi bi-person"></i> Student
+                    </label>
+                    <input type="radio" name="role" id="role-company" value="company">
+                    <label for="role-company">
+                        <i class="bi bi-building"></i> Company
+                    </label>
+                </div>
+
+                <div class="input-field">
+                    <label for="email">Email address</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope"></i>
+                        <input type="email" id="email" name="email"
+                               placeholder="your@email.com" required>
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-lock"></i>
+                        <input type="password" id="password" name="password"
+                               placeholder="Enter your password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    Sign in <i class="bi bi-arrow-right"></i>
+                </button>
+
+            </form>
+
+            <div class="login-footer-links">
+                Don't have an account?
+                <a href="{{ url_for('register_student') }}">Register here</a>
+            </div>
+
+            <div class="admin-link-wrap">
+                <a href="{{ url_for('admin_login') }}" class="admin-pill">
+                    <i class="bi bi-shield-lock"></i> Admin login
+                </a>
+            </div>
+
         </div>
     </div>
 </div>
-
 {% endblock %}

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block full_page %}
+<div class="hp-root">
+
+    <nav class="hp-nav">
+        <div class="hp-nav-logo">
+            <div class="login-logo-icon">
+                <i class="bi bi-briefcase-fill"></i>
+            </div>
+            <span class="hp-nav-logo-text">Placify</span>
+        </div>
+        <div>
+            <a href="{{ url_for('login') }}" class="hp-nav-btn-outline me-2">Login</a>
+            <a href="{{ url_for('register_student') }}" class="hp-nav-btn-solid">Register</a>
+        </div>
+    </nav>
+
+    <div class="hp-hero">
+        <div class="hp-orb" style="width:380px; height:380px; background:#6366f1; top:-120px; left:-100px;"></div>
+        <div class="hp-orb" style="width:260px; height:260px; background:#8b5cf6; bottom:-80px; right:-80px; animation-delay:3s;"></div>
+
+        <div class="hp-badge">
+            <span class="hp-badge-dot"></span>
+            Campus placement made simple
+        </div>
+
+        <h1>Your gateway<br><span>to placements</span></h1>
+
+        <p>
+            Placify connects students with top companies.
+            Apply for drives, track your applications,
+            and land your dream job — all in one place.
+        </p>
+
+        <div class="hp-cta-row">
+            <a href="{{ url_for('register_student') }}" class="hp-cta-primary">
+                Get started <i class="bi bi-arrow-right"></i>
+            </a>
+            <a href="{{ url_for('login') }}" class="hp-cta-secondary">
+                Login to your account
+            </a>
+        </div>
+
+        <div class="hp-stats-row">
+            <div class="hp-stat-cell">
+                <div class="hp-stat-num">{{ student_count }}</div>
+                <div class="hp-stat-label">Students registered</div>
+            </div>
+            <div class="hp-stat-cell">
+                <div class="hp-stat-num">{{ company_count }}</div>
+                <div class="hp-stat-label">Companies approved</div>
+            </div>
+            <div class="hp-stat-cell">
+                <div class="hp-stat-num">{{ drive_count }}</div>
+                <div class="hp-stat-label">Active drives</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hp-features">
+        <p class="hp-features-label">Everything you need</p>
+        <div class="row g-3">
+
+            <div class="col-md-4">
+                <div class="hp-feature-card">
+                    <div class="hp-feature-icon" style="background: rgba(99,102,241,0.15);">
+                        <i class="bi bi-person-check" style="color: #818cf8;"></i>
+                    </div>
+                    <div class="hp-feature-title">Student portal</div>
+                    <div class="hp-feature-desc">
+                        Browse approved drives, apply with one click,
+                        and track your application status in real time.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="hp-feature-card">
+                    <div class="hp-feature-icon" style="background: rgba(34,197,94,0.12);">
+                        <i class="bi bi-building" style="color: #4ade80;"></i>
+                    </div>
+                    <div class="hp-feature-title">Company dashboard</div>
+                    <div class="hp-feature-desc">
+                        Post placement drives, review applications,
+                        and manage your entire recruitment pipeline.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="hp-feature-card">
+                    <div class="hp-feature-icon" style="background: rgba(245,158,11,0.12);">
+                        <i class="bi bi-shield-check" style="color: #fbbf24;"></i>
+                    </div>
+                    <div class="hp-feature-title">Admin control</div>
+                    <div class="hp-feature-desc">
+                        Approve companies, manage students, oversee
+                        all drives and view complete placement history.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="hp-feature-card">
+                    <div class="hp-feature-icon" style="background: rgba(236,72,153,0.12);">
+                        <i class="bi bi-file-earmark-person" style="color: #f472b6;"></i>
+                    </div>
+                    <div class="hp-feature-title">Resume uploads</div>
+                    <div class="hp-feature-desc">
+                        Upload resumes and certificates directly.
+                        Companies access them instantly during shortlisting.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="hp-feature-card">
+                    <div class="hp-feature-icon" style="background: rgba(14,165,233,0.12);">
+                        <i class="bi bi-bar-chart-line" style="color: #38bdf8;"></i>
+                    </div>
+                    <div class="hp-feature-title">Placement history</div>
+                    <div class="hp-feature-desc">
+                        Full historical data of all placements.
+                        Admins and students can track past results anytime.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="hp-feature-card">
+                    <div class="hp-feature-icon" style="background: rgba(168,85,247,0.12);">
+                        <i class="bi bi-search" style="color: #c084fc;"></i>
+                    </div>
+                    <div class="hp-feature-title">Smart search</div>
+                    <div class="hp-feature-desc">
+                        Admins can search students and companies
+                        by name, email, or contact info instantly.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="hp-footer">
+        <span class="hp-footer-text">© 2025 Placify — Campus Placement Portal</span>
+        <div class="hp-footer-links">
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('register_student') }}">Register</a>
+            <a href="{{ url_for('admin_login') }}">Admin</a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

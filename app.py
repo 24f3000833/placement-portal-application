@@ -20,7 +20,14 @@ db.init_app(app)
 #Home Route
 @app.route("/")
 def home():
-    return redirect(url_for("login"))
+    student_count = Student.query.count()
+    company_count = Company.query.filter_by(approval_status=True).count()
+    drive_count = PlacementDrive.query.filter_by(status="Active").count()
+    return render_template("home.html",
+        student_count=student_count,
+        company_count=company_count,
+        drive_count=drive_count
+    )
 
 
 ############  AUTHENTICATION WORKSS  ###############################
