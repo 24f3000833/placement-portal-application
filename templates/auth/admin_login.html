@@ -1,31 +1,61 @@
 {% extends "base.html" %}
-{% block content %}
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header text-center fw-bold">Placify — Admin Login</div>
-            <div class="card-body">
-                <form method="POST" action="{{ url_for('admin_login') }}">
-                    <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <input type="text" name="username" class="form-control" required>
-                    </div>
+{% block full_page %}
+<div class="al-body">
+    <div class="al-card">
 
-
-                    <div class="mb-3">
-                        <label class= "form-label">Password</label>
-                        <input type = "password" name="password" class="form-control" required>
-                    </div>
-
-                    <button type ="submit" class="btn btn-primary w-100">Login as Admin</button>
-                </form>
-                
-                <hr>
-                <p class="text-center">Not admin? <a href="{{ url_for('login') }}">Go to login</a></p>
+        <div class="al-top">
+            <div class="al-shield">
+                <i class="bi bi-shield-lock"></i>
+            </div>
+            <h2>Admin access</h2>
+            <p>Restricted area — authorised personnel only</p>
+            <div class="al-warning">
+                <span class="al-warning-dot"></span>
+                <span>This login is for administrators only</span>
             </div>
         </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} mx-4 mt-4 mb-0" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('admin_login') }}">
+            <div class="al-form">
+                <div class="input-field">
+                    <label for="username">Username</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person"></i>
+                        <input type="text" id="username" name="username"
+                               placeholder="Admin username" required>
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-lock"></i>
+                        <input type="password" id="password" name="password"
+                               placeholder="Admin password" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    Access dashboard <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </form>
+
+        <div class="al-footer">
+            Not admin? <a href="{{ url_for('login') }}">Back to login</a>
+        </div>
+
     </div>
 </div>
-
 {% endblock %}
