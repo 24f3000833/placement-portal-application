@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
 {% block full_page %}
 <div class="al-body">
     <div class="al-card">
@@ -46,7 +48,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="login-btn">
+                <button type="submit" class="btn-primary-custom">
                     Access dashboard <i class="bi bi-arrow-right"></i>
                 </button>
             </div>

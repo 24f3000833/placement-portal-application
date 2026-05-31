@@ -1,32 +1,98 @@
 {% extends "base.html" %}
-{% block content %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
 
-<div class="row justify-content-center mt-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header text-center fw-bold">Student Registration</div>
-            <div class="card-body">
+{% block full_page %}
+<div class="login-page-body">
+    <div class="login-wrapper">
 
-                <form method="POST" action="{{ url_for('register_student') }}" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label class="form-label">Full Name</label>
-                        <input type="text" name="name" class="form-control" required>
+        <div class="login-left">
+            <div class="login-logo">
+                <div class="login-logo-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+                <span class="login-logo-text">Placify</span>
+            </div>
+
+            <div class="login-hero">
+                <h2>Start your placement journey</h2>
+                <p>Register once and apply to multiple companies.<br>Track your applications in real time.</p>
+            </div>
+
+            <div class="login-stats">
+                <div class="login-stat-pill">
+                    <span class="stat-dot" style="background-color: #22c55e;"></span>
+                    <span>Active drives</span>
+                    <strong>Live now</strong>
+                </div>
+                <div class="login-stat-pill">
+                    <span class="stat-dot" style="background-color: #6366f1;"></span>
+                    <span>Companies registered</span>
+                    <strong>Approved</strong>
+                </div>
+                <div class="login-stat-pill">
+                    <span class="stat-dot" style="background-color: #f59e0b;"></span>
+                    <span>Applications this month</span>
+                    <strong>Growing</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="login-right" style="overflow-y: auto;">
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <h3>Create account</h3>
+            <p class="login-subtitle">Fill in your details to get started</p>
+
+            <form method="POST" action="{{ url_for('register_student') }}" enctype="multipart/form-data">
+
+                <div class="input-field">
+                    <label>Full Name</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person"></i>
+                        <input type="text" name="name" placeholder="Your full name" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control" required>
+                </div>
+
+                <div class="input-field">
+                    <label>Email</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope"></i>
+                        <input type="email" name="email" placeholder="your@email.com" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control"  required>
+                </div>
+
+                <div class="input-field">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-lock"></i>
+                        <input type="password" name="password" placeholder="Create a password" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Phone</label>
-                        <input type="text" name="phone" class="form-control">
+                </div>
+
+                <div class="input-field">
+                    <label>Phone</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-telephone"></i>
+                        <input type="text" name="phone" placeholder="Your phone number">
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Degree</label>
-                        <select name="degree" class="form-select" required>
+                </div>
+
+                <div class="input-field">
+                    <label>Degree</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-book"></i>
+                        <select name="degree" required>
                             <option value="" disabled selected>Select degree</option>
                             <option value="B.Tech">B.Tech</option>
                             <option value="MBA">MBA</option>
@@ -36,28 +102,46 @@
                             <option value="Other">Other</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Branch</label>
-                        <input type="text" name="branch" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">CGPA</label>
-                        <input type="number" name="cgpa" class ="form-control" step  ="0.01" min="0" max="10" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Resume (PDF only) *</label>
-                        <input type="file" name= "resume" class= "form-control" accept=".pdf" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Register</button>
-                </form>
+                </div>
 
+                <div class="input-field">
+                    <label>Branch</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-diagram-3"></i>
+                        <input type="text" name="branch" placeholder="e.g. Computer Science">
+                    </div>
+                </div>
 
-                <hr>
-                <p class="text-center">Already have account? <a href="{{ url_for('login') }}">Login</a></p>
+                <div class="input-field">
+                    <label>CGPA</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-star"></i>
+                        <input type="number" name="cgpa" placeholder="e.g. 8.5" step="0.01" min="0" max="10" required>
+                    </div>
+                </div>
 
+                <div class="input-field">
+                    <label>Resume (PDF only)</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                        <input type="file" name="resume" accept=".pdf" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary-custom">
+                    Register <i class="bi bi-arrow-right"></i>
+                </button>
+
+            </form>
+
+            <div class="page-footer-link">
+                <span>Already have an account?</span>
+                <a href="{{ url_for('login') }}">
+                    Sign in <i class="bi bi-arrow-right-short"></i>
+                </a>
             </div>
+
         </div>
     </div>
 </div>
-
-{% endblock %}
+{%endblock%}

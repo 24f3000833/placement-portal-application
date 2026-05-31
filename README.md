@@ -77,26 +77,52 @@ The system consists of the following main entities:
 * The Application table acts as a junction table to resolve the many-to-many relationship between students and placement drives.
 
 
+
 ## Project Structure
 
+```
 Placement_Portal/
 │
-├── app.py                # Main Flask application
-├── models.py             # Database models
-├── init_db.py            # Database initialization script
-├── requirements.txt      # Python dependencies
-├── README.md             # Project documentation
+├── app.py
+├── models.py
+├── init_db.py
+├── requirements.txt
+├── README.md
 │
 ├── static/
 │   ├── css/
-│   └── upload/           # Uploaded resumes and certificates
+│   │   ├── global.css
+│   │   ├── auth.css
+│   │   ├── home.css
+│   │   
+│   └── upload/
 │
 └── templates/
-    ├── admin/
+    ├── base.html
+    ├── home.html
     ├── auth/
+    │   ├── login.html
+    │   ├── admin_login.html
+    │   ├── register_student.html
+    │   └── register_company.html
     ├── student/
-    └── company/
-
+    │   ├── dashboard.html
+    │   ├── profile.html
+    │   ├── applications.html
+    │   └── drive_detail.html
+    ├── company/
+    │   ├── dashboard.html
+    │   ├── create_drive.html
+    │   ├── edit_drive.html
+    │   ├── applicants.html
+    │   └── review_application.html
+    └── admin/
+        ├── admin_dashboard.html
+        ├── student_detail.html
+        ├── company_detail.html
+        ├── drive_detail.html
+        └── application_detail.html
+```
 
 ## Installation and Setup
 

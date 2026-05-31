@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
 
 {% block full_page %}
 <div class="hp-root">

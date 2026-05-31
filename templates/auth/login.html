@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
 {% block full_page %}
 <div class="login-page-body">
     <div class="login-wrapper">
@@ -82,19 +84,25 @@
                     </div>
                 </div>
 
-                <button type="submit" class="login-btn">
+                <button type="submit" class="btn-primary-custom">
                     Sign in <i class="bi bi-arrow-right"></i>
                 </button>
 
             </form>
-            <div class="login-footer-links">
+            <div class="page-footer-link">
                 <span>Don't have an account?</span>
                 <a href="{{ url_for('register_student') }}">
                     Create account
                 <i class="bi bi-arrow-right-short"></i>
                 </a>
             </div>
-
+            <div class="page-footer-link">
+                <span>Are you a company?</span>
+                <a href="{{ url_for('register_company') }}">
+                    Register here 
+                <i class="bi bi-arrow-right-short"></i>
+                </a>
+            </div>
             <div class="admin-link-wrap">
                 <a href="{{ url_for('admin_login') }}" class="admin-pill">
                     <i class="bi bi-shield-lock"></i> Admin login
