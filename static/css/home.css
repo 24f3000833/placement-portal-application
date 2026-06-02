@@ -170,7 +170,7 @@
 
 .hp-stats-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1px;
     background: rgba(255, 255, 255, 0.06);
     border-top: 0.5px solid rgba(255, 255, 255, 0.06);

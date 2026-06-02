@@ -1,69 +1,164 @@
 {% extends "base.html" %}
-{% block content %}
+{% block full_page %}
 
-<div class="d-flex justify-content-between mb-4">
-    <h4>Company Details</h4>
-    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Back</a>
-</div>
+<div class="ad-root">
 
-<div class="card">
-    <div class="card-header fw-bold">Company Information</div>
-    <div class="card-body">
-        <table class="table table-bordered">
-            <tr><th style="width:25%">Company ID</th><td>#{{ company.id }}</td></tr>
-            <tr><th>Name</th><td>{{ company.name }}</td></tr>
-            <tr><th>Email</th><td>{{ company.email }}</td></tr>
-            <tr><th>Website</th><td>{{ company.website or "Not provided" }}</td></tr>
-            <tr>
-                <th>Status</th>
-                <td>
-                    <span class="badge {% if company.approval_status == 'Approved' %}bg-success{% elif company.approval_status == 'Pending' %}bg-warning text-dark{% else %}bg-danger{% endif %}">{{ company.approval_status }}</span>
-                    {% if company.is_blacklisted %}<span class="badge bg-dark ms-1">Blacklisted</span>{% endif %}
-                </td>
-            </tr>
-            <tr><th>Joined</th><td>{{ joined_date }}</td></tr>
-        </table>
-        <a href="{{ url_for('uploaded_certificate', filename=company.certificate) }}" target="_blank" class="btn btn-outline-primary">View Certificate</a>
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-header fw-bold">Ongoing Drives ({{ ongoing_drives|length }})</div>
-    <div class="card-body scrollable">
-        {% if ongoing_drives %}
-            {% for d in ongoing_drives %}
-            <div class="d-flex justify-content-between border-bottom py-2">
-                <div><strong>#{{ d.id }} {{ d.job_title }}</strong> | {{ d.applications|length }} Applications</div>
-                <a href="{{ url_for('admin_drive_detail', id=d.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+    <div class="ad-header">
+        <div class="ad-header-left">
+            <div class="ad-header-avatar">{{ company.name[0].upper() }}</div>
+            <div>
+                <div class="ad-header-welcome">Company Detail</div>
+                <div class="ad-header-name">{{ company.name }}</div>
             </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-muted">No ongoing drives.</p>
-        {% endif %}
+        </div>
+        <div class="ad-header-right">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-outline-custom">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-outline-custom">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
     </div>
-</div>
 
-<div class="card">
-    <div class="card-header fw-bold">Closed Drives ({{ closed_drives|length }})</div>
-    <div class="card-body scrollable">
-        {% if closed_drives %}
-            {% for d in closed_drives %}
-            <div class="d-flex justify-content-between border-bottom py-2">
-                <div><strong>#{{ d.id }} {{ d.job_title }}</strong> | {{ d.applications|length }} Applications</div>
-                <a href="{{ url_for('admin_drive_detail', id=d.id) }}" class="btn btn-sm btn-outline-secondary">View</a>
+    <div class="ad-body">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="ad-detail-grid">
+
+            <div class="ad-detail-info-card">
+                <div class="ad-detail-avatar">{{ company.name[0].upper() }}</div>
+                <div class="ad-detail-name">{{ company.name }}</div>
+                <div class="ad-detail-sub">{{ company.email }}</div>
+                <span class="ad-status-badge ad-status-{{ company.approval_status | lower }}">{{ company.approval_status }}</span>
+                {% if company.is_blacklisted %}
+                <span class="ad-status-badge ad-status-blacklisted">Blacklisted</span>
+                {% endif %}
+
+                <div class="ad-detail-list">
+                    <div class="ad-detail-row">
+                        <span class="ad-detail-label">Company ID</span>
+                        <span class="ad-detail-value">#{{ company.id }}</span>
+                    </div>
+                    <div class="ad-detail-row">
+                        <span class="ad-detail-label">Website</span>
+                        <span class="ad-detail-value">{{ company.website or 'N/A' }}</span>
+                    </div>
+                    <div class="ad-detail-row">
+                        <span class="ad-detail-label">Joined</span>
+                        <span class="ad-detail-value">{{ joined_date }}</span>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('uploaded_certificate', filename=company.certificate) }}"
+                   target="_blank" class="btn-outline-custom ad-detail-full-btn">
+                    <i class="bi bi-file-earmark-pdf"></i> View Certificate
+                </a>
+
+                <div class="ad-detail-actions">
+                    <a href="{{ url_for('blacklist_company', id=company.id) }}"
+                       class="ad-action-btn {% if company.is_blacklisted %}ad-btn-approve{% else %}ad-btn-reject{% endif %} ad-detail-full-btn">
+                        {% if company.is_blacklisted %}
+                        <i class="bi bi-unlock"></i> Unblacklist
+                        {% else %}
+                        <i class="bi bi-slash-circle"></i> Blacklist
+                        {% endif %}
+                    </a>
+                    {% if company.approval_status == 'Pending' %}
+                    <a href="{{ url_for('approve_company', id=company.id) }}" class="ad-action-btn ad-btn-approve ad-detail-full-btn">
+                        <i class="bi bi-check-lg"></i> Approve
+                    </a>
+                    <a href="{{ url_for('reject_company', id=company.id) }}"
+                       class="ad-action-btn ad-btn-reject ad-detail-full-btn"
+                       onclick="return confirm('Reject {{ company.name }}?')">
+                        <i class="bi bi-x-lg"></i> Reject
+                    </a>
+                    {% endif %}
+                </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-muted">No closed drives.</p>
-        {% endif %}
-    </div>
-</div>
 
-<div class="mt-3">
-    <a href="{{ url_for('blacklist_company', id=company.id) }}" class="btn {% if company.is_blacklisted %}btn-success{% else %}btn-danger{% endif %}">
-        {% if company.is_blacklisted %}Unblacklist{% else %}Blacklist{% endif %}
-    </a>
-    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">Back</a>
+            <div class="ad-detail-main">
+
+                <div class="ad-section">
+                    <div class="ad-section-header">
+                        <div class="ad-section-title">
+                            <i class="bi bi-briefcase-fill"></i>
+                            Ongoing Drives
+                            <span class="ad-count-badge">{{ ongoing_drives|length }}</span>
+                        </div>
+                    </div>
+                    <div class="ad-list">
+                        {% if ongoing_drives %}
+                            {% for d in ongoing_drives %}
+                            <div class="ad-list-card">
+                                <div class="ad-list-card-left">
+                                    <div class="ad-list-icon">{{ d.job_title[0].upper() }}</div>
+                                    <div>
+                                        <div class="ad-list-title">{{ d.job_title }}</div>
+                                        <div class="ad-list-sub">{{ d.applications|length }} Applications</div>
+                                    </div>
+                                    <span class="ad-status-badge ad-status-approved">Approved</span>
+                                </div>
+                                <a href="{{ url_for('admin_drive_detail', id=d.id) }}" class="btn-outline-custom ad-action-btn">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="ad-empty">
+                                <i class="bi bi-inbox"></i>
+                                <p>No ongoing drives</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="ad-section">
+                    <div class="ad-section-header">
+                        <div class="ad-section-title">
+                            <i class="bi bi-archive"></i>
+                            Closed Drives
+                            <span class="ad-count-badge">{{ closed_drives|length }}</span>
+                        </div>
+                    </div>
+                    <div class="ad-list">
+                        {% if closed_drives %}
+                            {% for d in closed_drives %}
+                            <div class="ad-list-card">
+                                <div class="ad-list-card-left">
+                                    <div class="ad-list-icon">{{ d.job_title[0].upper() }}</div>
+                                    <div>
+                                        <div class="ad-list-title">{{ d.job_title }}</div>
+                                        <div class="ad-list-sub">{{ d.applications|length }} Applications</div>
+                                    </div>
+                                    <span class="ad-status-badge ad-status-closed">Closed</span>
+                                </div>
+                                <a href="{{ url_for('admin_drive_detail', id=d.id) }}" class="btn-outline-custom ad-action-btn">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="ad-empty">
+                                <i class="bi bi-inbox"></i>
+                                <p>No closed drives</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}

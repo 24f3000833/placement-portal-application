@@ -1,48 +1,84 @@
 {% extends "base.html" %}
-{% block content %}
+{% block full_page %}
 
-<div class="d-flex justify-content-between mb-4">
-    <h4>Applicants — {{ drive.job_title }} ({{ applications|length }})</h4>
-    <a href="{{ url_for('company_dashboard') }}" class= "btn btn-outline-secondary">Back</a>
-</div>
+<div class="co-root">
 
-<div class ="card">
-    <div class= "card-body">
-        {% if applications %}
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Degree</th>
-                        <th>Branch</th>
-                        <th>CGPA</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for app in applications %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ app.student.name }}</td>
-                        <td>{{ app.student.degree }}</td>
-                        <td>{{ app.student.branch }}</td>
-                        <td>{{ app.student.cgpa }}</td>
-                        <td>
-                            <span class="badge {% if app.status == 'Selected' %}bg-success{% elif app.status == 'Shortlisted' %}bg-warning text-dark{% elif app.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %}">{{ app.status }}</span>
-                        </td>
-                        <td>
-                            <a href="{{ url_for('company_review_application', id=app.id) }}" class="btn btn-sm btn-outline-primary">Review</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p class = "text-muted">No applicants yet</p>
-        {% endif %}
-        
+    <div class="co-header">
+        <div class="co-header-left">
+            <div class="co-header-avatar">{{ company.name[0].upper() }}</div>
+            <div>
+                <div class="co-header-welcome">{{ drive.job_title }}</div>
+                <div class="co-header-name">Applicants</div>
+            </div>
+        </div>
+        <div class="co-header-right">
+            <a href="{{ url_for('company_dashboard') }}" class="btn-outline-custom">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-outline-custom">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="co-body">
+
+        <div class="co-app-section">
+            <div class="co-app-section-header">
+                <div class="co-dash-section-title">
+                    <i class="bi bi-people-fill"></i>
+                    Applicants for {{ drive.job_title }}
+                    <span class="co-dash-count-badge">{{ applications|length }}</span>
+                </div>
+            </div>
+
+            {% if applications %}
+            <div class="co-app-table-wrap">
+                <table class="co-app-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Degree</th>
+                            <th>Branch</th>
+                            <th>CGPA</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in applications %}
+                        <tr>
+                            <td class="co-app-index">{{ loop.index }}</td>
+                            <td class="co-app-name">
+                                <div class="co-app-name-row">
+                                    <div class="co-dash-drive-icon">{{ app.student.name[0].upper() }}</div>
+                                    {{ app.student.name }}
+                                </div>
+                            </td>
+                            <td>{{ app.student.degree }}</td>
+                            <td>{{ app.student.branch }}</td>
+                            <td>{{ app.student.cgpa }}</td>
+                            <td>
+                                <span class="co-dash-status-badge co-dash-status-{{ app.status | lower }}">{{ app.status }}</span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('company_review_application', id=app.id) }}" class="btn-outline-custom co-dash-action-btn">
+                                    <i class="bi bi-eye"></i> Review
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <div class="co-dash-empty">
+                    <i class="bi bi-inbox"></i>
+                    <p>No applicants yet</p>
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 

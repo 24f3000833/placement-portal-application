@@ -564,12 +564,24 @@ def student_dashboard():
         flash("Please login as Student", "danger")
         return redirect(url_for("login"))
     student = Student.query.get(session["user_id"])
-    approved_drives = PlacementDrive.query.filter_by(status="Approved").all()
+    search = request.args.get("search", "").strip()
+
+    drives_query = PlacementDrive.query.filter_by(status="Approved")
+    if search:
+        drives_query = drives_query.join(Company).filter(
+            PlacementDrive.job_title.ilike(f"%{search}%") |
+            Company.name.ilike(f"%{search}%") |
+            PlacementDrive.location.ilike(f"%{search}%")
+        )
+    approved_drives = drives_query.all()
+
     applications = Application.query.filter_by(student_id=student.id).all()
+
     return render_template("student/dashboard.html",
         student=student,
         approved_drives=approved_drives,
-        applications=applications
+        applications=applications,
+        search=search,
     )
 
 #Student drive details
@@ -625,10 +637,15 @@ def student_applications():
         flash("Please login as Student", "danger")
         return redirect(url_for("login"))
     student = Student.query.get(session["user_id"])
-    applications = Application.query.filter_by(student_id=student.id).all()
+    status_filter = request.args.get("status", "all")
+    apps_query = Application.query.filter_by(student_id=student.id)
+    if status_filter != "all":
+        apps_query = apps_query.filter_by(status=status_filter)
+    applications = apps_query.all()
     return render_template("student/applications.html",
         student=student,
-        applications=applications
+        applications=applications,
+        status_filter=status_filter
     )
 
 #Edit profile

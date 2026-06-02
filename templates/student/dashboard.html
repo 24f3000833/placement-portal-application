@@ -1,73 +1,162 @@
 {% extends "base.html" %}
-{% block content %}
+{% block full_page %}
 
-<div class="d-flex justify-content-between mb-4">
-    <h4>Welcome, {{ student.name }}</h4>
-    <a href="{{ url_for('student_profile') }}" class="btn btn-outline-secondary">Edit Profile</a>
-</div>
+<div class="st-root">
 
-<div class="row mb-4">
-    <div class ="col-md-3">
-        <div class="card text-center p-3">
-            <h3 class="text-primary">{{ approved_drives|length }}</h3>
-            <p class= "text-muted">Available Drives</p>
+    <div class="st-header">
+        <div class="st-header-left">
+            <div class="st-header-avatar">{{ student.name[0].upper() }}</div>
+            <div>
+                <div class="st-header-welcome">Welcome back</div>
+                <div class="st-header-name">{{ student.name }}</div>
+            </div>
+        </div>
+        <div class="st-header-right">
+            <a href="{{ url_for('student_profile') }}" class="btn-outline-custom">
+                <i class="bi bi-pencil"></i> Edit Profile
+            </a> 
+            <a href="{{ url_for('logout') }}" class="btn-outline-custom">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+             
         </div>
     </div>
-    <div class = "col-md-3">
-        <div class= "card text-center p-3">
-            <h3 class= "text-success">{{ applications|length }}</h3>
-            <p class= "text-muted">My Applications</p>
+
+    <div class="st-body">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="st-dash-stats">
+            <div class="st-dash-stat-card">
+                <div class="st-dash-stat-icon st-dash-stat-icon-purple">
+                    <i class="bi bi-briefcase"></i>
+                </div>
+                <div class="st-dash-stat-num">{{ approved_drives|length }}</div>
+                <div class="st-dash-stat-label">Available Drives</div>
+            </div>
+            <div class="st-dash-stat-card">
+                <div class="st-dash-stat-icon st-dash-stat-icon-green">
+                    <i class="bi bi-send"></i>
+                </div>
+                <div class="st-dash-stat-num">{{ applications|length }}</div>
+                <div class="st-dash-stat-label">My Applications</div>
+            </div>
+            <div class="st-dash-stat-card">
+                <div class="st-dash-stat-icon st-dash-stat-icon-yellow">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <div class="st-dash-stat-num">{{ applications|selectattr('status','equalto','Pending')|list|length }}</div>
+                <div class="st-dash-stat-label">Pending</div>
+            </div>
+            <div class="st-dash-stat-card">
+                <div class="st-dash-stat-icon st-dash-stat-icon-teal">
+                    <i class="bi bi-trophy"></i>
+                </div>
+                <div class="st-dash-stat-num">{{ applications|selectattr('status','equalto','Selected')|list|length }}</div>
+                <div class="st-dash-stat-label">Selected</div>
+            </div>
         </div>
 
-    </div>
-</div>
+        <div class="st-dash-grid">
 
-<div class="card">
-    <div class="card-header fw-bold">
-        Available Drives ({{ approved_drives|length }}) 
-    </div>
-
-    <div class="card-body scrollable">
-
-        {% if approved_drives %}
-            {% for d in approved_drives %}
-            <div class="d-flex justify-content-between border-bottom py-2">
-                <div>
-                    <strong>{{ d.job_title }}</strong> | {{ d.company.name }}
-                    {% if d.salary %} | {{ d.salary }}{% endif %}
-                    {% if d.location %} | {{ d.location }}{% endif %}
-                    {% if d.deadline %} | Deadline: {{ d.deadline }}{% endif %}
+            <div class="st-dash-section">
+                <div class="st-dash-section-header">
+                    <div class="st-dash-section-title">
+                        <i class="bi bi-briefcase-fill"></i>
+                        Available Drives
+                        <span class="st-dash-count-badge">{{ approved_drives|length }}</span>
+                    </div>
+                    <form method="GET" action="{{ url_for('student_dashboard') }}" class="st-dash-search-form">
+                        <input class="st-dash-search" type="text" name="search"
+                               placeholder="Search drives..." value="{{ search }}">
+                        <button type="submit" class="st-dash-search-btn">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
                 </div>
-                <div>
-                    <a href ="{{ url_for('student_drive_detail', id=d.id) }}" class = "btn btn-sm btn-outline-primary">View</a>
+
+                <div class="st-dash-list">
+                    {% if approved_drives %}
+                        {% for d in approved_drives %}
+                        <div class="st-dash-drive-card">
+                            <div class="st-dash-drive-top">
+                                <div class="st-dash-company-icon">{{ d.company.name[0].upper() }}</div>
+                                <div>
+                                    <div class="st-dash-drive-title">{{ d.job_title }}</div>
+                                    <div class="st-dash-drive-company">{{ d.company.name }}</div>
+                                </div>
+                                <a href="{{ url_for('student_drive_detail', id=d.id) }}" class="btn-primary-custom st-dash-drive-btn">
+                                    View <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                            <div class="st-dash-meta-row">
+                                {% if d.salary %}
+                                <span class="st-dash-meta-pill"><i class="bi bi-currency-rupee"></i> {{ d.salary }}</span>
+                                {% endif %}
+                                {% if d.location %}
+                                <span class="st-dash-meta-pill"><i class="bi bi-geo-alt"></i> {{ d.location }}</span>
+                                {% endif %}
+                                {% if d.deadline %}
+                                <span class="st-dash-meta-pill"><i class="bi bi-calendar"></i> {{ d.deadline }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="st-dash-empty">
+                            <i class="bi bi-inbox"></i>
+                            <p>No drives available right now</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <p class ="text-muted">
-                No drives available right now
-            </p>
-        {% endif %}
-    </div>
-</div>
 
-<div class="card">
-    <div class="card-header fw-bold">My Applications ({{ applications|length }})</div>
-    <div class="card-body scrollable">
-        {% if applications %}
-            {% for app in applications %}
-            <div class= "d-flex justify-content-between border-bottom py-2">
-                <div>
-                    <strong>{{ app.drive.job_title }}</strong> | {{ app.drive.company.name }}
-                    <span class= "badge {% if app.status ==  'Selected' %}bg-success{% elif app.status == 'Shortlisted' %}bg-warning text-dark{% elif app.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %} ms-1">{{ app.status }}</span>
+            <div class="st-dash-section">
+                <div class="st-dash-section-header">
+                    <div class="st-dash-section-title">
+                        <i class="bi bi-send-fill"></i>
+                        My Applications
+                        <span class="st-dash-count-badge">{{ applications|length }}</span>
+                    </div>
+                    <a href="{{ url_for('student_applications') }}" class="btn-outline-custom">
+                         <i class="bi bi-list-ul"></i> View All
+                    </a>
+                </div>
+
+                <div class="st-dash-list">
+                    {% if applications %}
+                        {% for app in applications %}
+                        <div class="st-dash-app-card">
+                            <div class="st-dash-app-left">
+                                <div class="st-dash-company-icon">{{ app.drive.company.name[0].upper() }}</div>
+                                <div>
+                                    <div class="st-dash-drive-title">{{ app.drive.job_title }}</div>
+                                    <div class="st-dash-drive-company">{{ app.drive.company.name }}</div>
+                                </div>
+                            </div>
+                            <span class="st-dash-status-badge st-dash-status-{{ app.status | lower }}">{{ app.status }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="st-dash-empty">
+                            <i class="bi bi-file-earmark-x"></i>
+                            <p>No applications yet</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <p class ="text-muted">No applications yet.</p>
-        {% endif %}
-    </div>
 
+        </div>
+    </div>
 </div>
 
 {% endblock %}

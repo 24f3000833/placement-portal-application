@@ -1,57 +1,125 @@
 {% extends "base.html" %}
-{% block content %}
+{% block full_page %}
 
-<div class= "d-flex justify-content-between mb-4">
-    <h4>Edit Profile</h4>
-    <a href="{{ url_for('student_dashboard') }}" class ="btn btn-outline-secondary">Back</a>
-</div>
+<div class="st-root">
 
-<div class="card">
-    <div class="card-body">
-        <form method="POST" action="{{ url_for('student_profile') }}" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label class ="form-label">Full Name</label>
-                <input type ="text" name= "name" class="form-control" value="{{ student.name }}" required>
+    <div class="st-header">
+        <div class="st-header-left">
+            <div class="st-header-avatar">{{ student.name[0].upper() }}</div>
+            <div>
+                <div class="st-header-welcome">Editing profile</div>
+                <div class="st-header-name">{{ student.name }}</div>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Phone</label>
-                <input type="text" name= "phone" class="form-control" value="{{ student.phone or '' }}">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Degree</label>
-                <select name="degree" class="form-select" required>
-                    <option value="B.Tech" {% if student.degree == 'B.Tech' %}selected{% endif %}>B.Tech</option>
-                    <option value="MBA" {% if student.degree == 'MBA' %}selected{% endif %}>MBA</option>
-                    <option value="MCA" {% if student.degree == 'MCA' %}selected{% endif %}>MCA</option>
-                    <option value="BCA" {% if student.degree == 'BCA' %}selected{% endif %}>BCA</option>
-                    <option value="B.Sc" {% if student.degree == 'B.Sc' %}selected{% endif %}>B.Sc</option>
-                    <option value="Other" {% if student.degree == 'Other' %}selected{% endif %}>Other</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Branch</label>
-                <input type="text" name="branch" class="form-control" value="{{ student.branch }}">
-            </div>
-
-            <div class="mb-3">
-                <label class= "form-label">CGPA</label>
-                <input type  ="number" name= "cgpa" class="form-control" value = "{{ student.cgpa }}" step="0.01" min ="0" max="10" required>
-            </div>
-            <div class ="mb-3">
-                <label class = "form-label">Resume</label>
-                <p class="text-muted">Current: {{ student.resume }}</p>
-                <input type = "file" name= "resume" class="form-control" accept =".pdf">
-                <small class = "text-muted">Leave empty to keep current resume</small>
-            </div>
-
-            <button type = "submit" class ="btn btn-primary">Save Changes</button>
-            <a href ="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
-        </form>
-
+        </div>
+        <div class="st-header-right">
+            <a href="{{ url_for('student_dashboard') }}" class="btn-outline-custom">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-outline-custom">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
     </div>
 
-    
+    <div class="st-body">
+
+        
+
+        <div class="st-prof-grid">
+
+            <div class="st-prof-info-card">
+                <div class="st-prof-avatar">{{ student.name[0].upper() }}</div>
+                <div class="st-prof-name">{{ student.name }}</div>
+                <div class="st-prof-email">{{ student.email }}</div>
+                <div class="st-prof-pills">
+                    <span class="st-prof-pill"><i class="bi bi-book"></i> {{ student.degree or 'N/A' }}</span>
+                    <span class="st-prof-pill"><i class="bi bi-diagram-3"></i> {{ student.branch or 'N/A' }}</span>
+                    <span class="st-prof-pill"><i class="bi bi-star"></i> {{ student.cgpa or 'N/A' }}</span>
+                </div>
+                {% if student.resume %}
+                <div class="st-prof-resume">
+                    <i class="bi bi-file-earmark-pdf"></i>
+                    <span>{{ student.resume }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="st-prof-form-card">
+                <div class="st-prof-form-title">Edit Information</div>
+
+                <form method="POST" action="{{ url_for('student_profile') }}" enctype="multipart/form-data">
+
+                    <div class="input-field">
+                        <label>Full Name</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-person"></i>
+                            <input type="text" name="name" value="{{ student.name }}" required>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Phone</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-telephone"></i>
+                            <input type="text" name="phone" value="{{ student.phone or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Degree</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-book"></i>
+                            <select name="degree" required>
+                                <option value="B.Tech" {% if student.degree == 'B.Tech' %}selected{% endif %}>B.Tech</option>
+                                <option value="MBA"    {% if student.degree == 'MBA'    %}selected{% endif %}>MBA</option>
+                                <option value="MCA"    {% if student.degree == 'MCA'    %}selected{% endif %}>MCA</option>
+                                <option value="BCA"    {% if student.degree == 'BCA'    %}selected{% endif %}>BCA</option>
+                                <option value="B.Sc"   {% if student.degree == 'B.Sc'   %}selected{% endif %}>B.Sc</option>
+                                <option value="Other"  {% if student.degree == 'Other'  %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Branch</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-diagram-3"></i>
+                            <input type="text" name="branch" value="{{ student.branch or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>CGPA</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-star"></i>
+                            <input type="number" name="cgpa" value="{{ student.cgpa }}"
+                                   step="0.01" min="0" max="10" required>
+                        </div>
+                    </div>
+
+                    <div class="input-field">
+                        <label>Resume (PDF only)</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                            <input type="file" name="resume" accept=".pdf">
+                        </div>
+                        <small class="st-prof-hint">Leave empty to keep current resume</small>
+                    </div>
+
+                    <div class="st-prof-btn-row">
+                        <button type="submit" class="btn-primary-custom">
+                            <i class="bi bi-check-lg"></i> Save Changes
+                        </button>
+                        <a href="{{ url_for('student_dashboard') }}" class="btn-outline-custom">
+                            Cancel
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
 </div>
 
 {% endblock %}

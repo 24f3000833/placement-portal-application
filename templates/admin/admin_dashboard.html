@@ -1,212 +1,367 @@
 {% extends "base.html" %}
-{% block content %}
+{% block full_page %}
 
-<h4 class="mb-4">Admin Dashboard</h4>
+<div class="ad-root">
 
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-center p-3">
-            <h3 class="text-primary">{{ total_students }}</h3>
-            <p class="text-muted">Students</p>
+    <div class="ad-header">
+        <div class="ad-header-left">
+            <div class="ad-header-avatar">
+                <i class="bi bi-shield-fill"></i>
+            </div>
+            <div>
+                <div class="ad-header-welcome">Admin Panel</div>
+                <div class="ad-header-name">Placify Dashboard</div>
+            </div>
+        </div>
+        <div class="ad-header-right">
+            <form method="GET" action="{{ url_for('admin_dashboard') }}" class="ad-search-form">
+                <input class="ad-search" type="text" name="search"
+                       placeholder="Search students or companies..." value="{{ search }}">
+                <button type="submit" class="ad-search-btn">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+            <a href="{{ url_for('logout') }}" class="btn-outline-custom">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card text-center p-3">
-            <h3 class="text-success">{{ total_companies }}</h3>
-            <p class="text-muted">Companies</p>
+    <div class="ad-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="ad-stats-row">
+            <div class="ad-stat-card">
+                <div class="ad-stat-icon ad-stat-icon-purple">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="ad-stat-num">{{ total_students }}</div>
+                <div class="ad-stat-label">Students</div>
+            </div>
+            <div class="ad-stat-card">
+                <div class="ad-stat-icon ad-stat-icon-green">
+                    <i class="bi bi-building"></i>
+                </div>
+                <div class="ad-stat-num">{{ total_companies }}</div>
+                <div class="ad-stat-label">Companies</div>
+            </div>
+            <div class="ad-stat-card">
+                <div class="ad-stat-icon ad-stat-icon-yellow">
+                    <i class="bi bi-briefcase"></i>
+                </div>
+                <div class="ad-stat-num">{{ total_drives }}</div>
+                <div class="ad-stat-label">Drives</div>
+            </div>
+            <div class="ad-stat-card">
+                <div class="ad-stat-icon ad-stat-icon-teal">
+                    <i class="bi bi-send"></i>
+                </div>
+                <div class="ad-stat-num">{{ total_applications }}</div>
+                <div class="ad-stat-label">Applications</div>
+            </div>
         </div>
-    </div>
 
+        {% if search %}
 
-    <div class="col-md-3">
-        <div class="card text-center p-3">
-            <h3 class="text-warning">{{ total_drives }}</h3>
-            <p class="text-muted">Drives</p>
+        <div class="ad-section">
+            <div class="ad-section-header">
+                <div class="ad-section-title">
+                    <i class="bi bi-search"></i>
+                    Search Results for "{{ search }}"
+                </div>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn-outline-custom ad-action-btn">
+                    <i class="bi bi-x"></i> Clear
+                </a>
+            </div>
+            <div class="ad-list">
+                {% set company_results = pending_companies + all_companies %}
+                {% if company_results %}
+                    <div class="ad-list-label">Companies</div>
+                    {% for c in company_results %}
+                    <div class="ad-list-card">
+                        <div class="ad-list-card-left">
+                            <div class="ad-list-icon">{{ c.name[0].upper() }}</div>
+                            <div>
+                                <div class="ad-list-title">{{ c.name }}</div>
+                                <div class="ad-list-sub">{{ c.email }}</div>
+                            </div>
+                            <span class="ad-status-badge ad-status-{{ c.approval_status | lower }}">{{ c.approval_status }}</span>
+                            {% if c.is_blacklisted %}
+                            <span class="ad-status-badge ad-status-blacklisted">Blacklisted</span>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('admin_company_detail', id=c.id) }}" class="btn-outline-custom ad-action-btn">
+                            <i class="bi bi-eye"></i> View
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% if all_students %}
+                    <div class="ad-list-label">Students</div>
+                    {% for s in all_students %}
+                    <div class="ad-list-card">
+                        <div class="ad-list-card-left">
+                            <div class="ad-list-icon">{{ s.name[0].upper() }}</div>
+                            <div>
+                                <div class="ad-list-title">{{ s.name }}</div>
+                                <div class="ad-list-sub">{{ s.degree }} | {{ s.branch }} | CGPA: {{ s.cgpa }}</div>
+                            </div>
+                            {% if s.is_blacklisted %}
+                            <span class="ad-status-badge ad-status-blacklisted">Blacklisted</span>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('admin_student_detail', id=s.id) }}" class="btn-outline-custom ad-action-btn">
+                            <i class="bi bi-eye"></i> View
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% if not company_results and not all_students %}
+                    <div class="ad-empty">
+                        <i class="bi bi-search"></i>
+                        <p>No results found</p>
+                    </div>
+                {% endif %}
+            </div>
         </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="card text-center p-3">
-            <h3 class="text-danger">{{ total_applications }}</h3>
-            <p class="text-muted">Applications</p>
+        {% else %}
+
+        <div class="ad-dash-grid">
+
+            <div class="ad-section">
+                <div class="ad-section-header">
+                    <div class="ad-section-title">
+                        <i class="bi bi-building-fill"></i>
+                        Pending Company Approvals
+                        <span class="ad-count-badge">{{ pending_companies|length }}</span>
+                    </div>
+                </div>
+                <div class="ad-list">
+                    {% if pending_companies %}
+                        {% for c in pending_companies %}
+                        <div class="ad-list-card">
+                            <div class="ad-list-card-left">
+                                <div class="ad-list-icon">{{ c.name[0].upper() }}</div>
+                                <div>
+                                    <div class="ad-list-title">{{ c.name }}</div>
+                                    <div class="ad-list-sub">{{ c.email }}</div>
+                                </div>
+                            </div>
+                            <div class="ad-list-actions">
+                                <a href="{{ url_for('uploaded_certificate', filename=c.certificate) }}" target="_blank" class="btn-outline-custom ad-action-btn">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                                <a href="{{ url_for('admin_company_detail', id=c.id) }}" class="btn-outline-custom ad-action-btn">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('approve_company', id=c.id) }}" class="ad-action-btn ad-btn-approve">
+                                    <i class="bi bi-check-lg"></i> Approve
+                                </a>
+                                <a href="{{ url_for('reject_company', id=c.id) }}"
+                                   class="ad-action-btn ad-btn-reject"
+                                   onclick="return confirm('Reject {{ c.name }}?')">
+                                    <i class="bi bi-x-lg"></i> Reject
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="ad-empty">
+                            <i class="bi bi-check-circle"></i>
+                            <p>No pending approvals</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="ad-section">
+                <div class="ad-section-header">
+                    <div class="ad-section-title">
+                        <i class="bi bi-briefcase-fill"></i>
+                        Pending Drive Approvals
+                        <span class="ad-count-badge">{{ pending_drives|length }}</span>
+                    </div>
+                </div>
+                <div class="ad-list">
+                    {% if pending_drives %}
+                        {% for d in pending_drives %}
+                        <div class="ad-list-card">
+                            <div class="ad-list-card-left">
+                                <div class="ad-list-icon">{{ d.job_title[0].upper() }}</div>
+                                <div>
+                                    <div class="ad-list-title">{{ d.job_title }}</div>
+                                    <div class="ad-list-sub">{{ d.company.name }}</div>
+                                </div>
+                            </div>
+                            <div class="ad-list-actions">
+                                <a href="{{ url_for('admin_drive_detail', id=d.id) }}" class="btn-outline-custom ad-action-btn">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('approve_drive', id=d.id) }}" class="ad-action-btn ad-btn-approve">
+                                    <i class="bi bi-check-lg"></i> Approve
+                                </a>
+                                <a href="{{ url_for('reject_drive', id=d.id) }}" class="ad-action-btn ad-btn-reject">
+                                    <i class="bi bi-x-lg"></i> Reject
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="ad-empty">
+                            <i class="bi bi-check-circle"></i>
+                            <p>No pending drive approvals</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
         </div>
-    </div>
-</div>
 
-{% if search %}
-
-<div class="card">
-    <div class="card-header fw-bold">Search Results for "{{ search }}"</div>
-    <div class="card-body scrollable">
-        {% set company_results = pending_companies + all_companies %}
-        {% if company_results %}
-            <p class="text-muted fw-bold">Companies</p>
-            {% for c in company_results %}
-            <div class="d-flex justify-content-between border-bottom py-2">
-                <div>
-                    <strong>#{{ c.id }} {{ c.name }}</strong> | {{ c.email }}
-                    <span class="badge {% if c.approval_status == 'Approved' %}bg-success{% elif c.approval_status == 'Pending' %}bg-warning text-dark{% else %}bg-danger{% endif %} ms-1">{{ c.approval_status }}</span>
-                    {% if c.is_blacklisted %}<span class="badge bg-dark ms-1">Blacklisted</span>{% endif %}
-                </div>
-                <a href="{{ url_for('admin_company_detail', id=c.id) }}" class="btn btn-sm btn-outline-primary">View</a>
-            </div>
-            {% endfor %}
-        {% endif %}
-
-
-        {% if all_students %}
-            <p class="text-muted fw-bold mt-3">Students</p>
-            {% for s in all_students %}
-            <div class="d-flex justify-content-between border-bottom py-2">
-                <div>
-                    <strong>#{{ s.id }} {{ s.name }}</strong> | {{ s.degree }} | {{ s.branch }} | CGPA: {{ s.cgpa }}
-                    {% if s.is_blacklisted %}<span class="badge bg-dark ms-1">Blacklisted</span>{% endif %}
-                </div>
-                <a href="{{ url_for('admin_student_detail', id=s.id) }}" class="btn btn-sm btn-outline-primary">View</a>
-            </div>
-            {% endfor %}
-        {% endif %}
-
-        
-        {% if not company_results and not all_students %}
-            <p class="text-muted">No results found.</p>
-        {% endif %}
-    </div>
-</div>
-
-{% else %}
-
-<div class="card">
-    <div class="card-header fw-bold">Pending Company Approvals ({{ pending_companies|length }})</div>
-    <div class="card-body scrollable">
-        {% if pending_companies %}
-            {% for c in pending_companies %}
-            <div class="d-flex justify-content-between border-bottom py-2">
-                <div><strong>#{{ c.id }} {{ c.name }}</strong> | {{ c.email }}</div>
-                <div>
-                    <a href="{{ url_for('uploaded_certificate', filename=c.certificate) }}" target="_blank" class="btn btn-sm btn-outline-secondary">Certificate</a>
-                    <a href="{{ url_for('admin_company_detail', id=c.id) }}" class="btn btn-sm btn-outline-primary">View</a>
-                    <a href="{{ url_for('approve_company', id=c.id) }}" class="btn btn-sm btn-success">Approve</a>
-                    <a href="{{ url_for('reject_company', id=c.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Reject {{ c.name }}?')">Reject</a>
+        <div class="ad-section">
+            <div class="ad-section-header">
+                <div class="ad-section-title">
+                    <i class="bi bi-building"></i>
+                    Registered Companies
+                    <span class="ad-count-badge">{{ all_companies|length }}</span>
                 </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-muted">No pending approvals.</p>
-        {% endif %}
-    </div>
-</div>
+            <div class="ad-list">
+                {% if all_companies %}
+                    {% for c in all_companies %}
+                    <div class="ad-list-card">
+                        <div class="ad-list-card-left">
+                            <div class="ad-list-icon">{{ c.name[0].upper() }}</div>
+                            <div>
+                                <div class="ad-list-title">{{ c.name }}</div>
+                                <div class="ad-list-sub">{{ c.email }}</div>
+                            </div>
+                            <span class="ad-status-badge ad-status-approved">Approved</span>
+                            {% if c.is_blacklisted %}
+                            <span class="ad-status-badge ad-status-blacklisted">Blacklisted</span>
+                            {% endif %}
+                        </div>
+                        <div class="ad-list-actions">
+                            <a href="{{ url_for('admin_company_detail', id=c.id) }}" class="btn-outline-custom ad-action-btn">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                            <a href="{{ url_for('blacklist_company', id=c.id) }}"
+                               class="ad-action-btn {% if c.is_blacklisted %}ad-btn-approve{% else %}ad-btn-reject{% endif %}">
+                                {% if c.is_blacklisted %}
+                                <i class="bi bi-unlock"></i> Unblacklist
+                                {% else %}
+                                <i class="bi bi-slash-circle"></i> Blacklist
+                                {% endif %}
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="ad-empty">
+                        <i class="bi bi-building"></i>
+                        <p>No companies registered yet</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
 
-<div class="card">
-    <div class="card-header fw-bold">Pending Drive Approvals ({{ pending_drives|length }})</div>
-    <div class="card-body scrollable">
-        {% if pending_drives %}
-            {% for d in pending_drives %}
-            <div class="d-flex justify-content-between border-bottom py-2">
-                <div><strong>#{{ d.id }} {{ d.job_title }}</strong> | {{ d.company.name }}</div>
-                <div>
-                    <a href="{{ url_for('admin_drive_detail', id=d.id) }}" class="btn btn-sm btn-outline-primary">View</a>
-                    <a href="{{ url_for('approve_drive', id=d.id) }}" class="btn btn-sm btn-success">Approve</a>
-                    <a href="{{ url_for('reject_drive', id=d.id) }}" class="btn btn-sm btn-danger">Reject</a>
+        <div class="ad-section">
+            <div class="ad-section-header">
+                <div class="ad-section-title">
+                    <i class="bi bi-people-fill"></i>
+                    Registered Students
+                    <span class="ad-count-badge">{{ all_students|length }}</span>
                 </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-muted">No pending drive approvals.</p>
-        {% endif %}
-    </div>
-</div>
+            <div class="ad-list">
+                {% if all_students %}
+                    {% for s in all_students %}
+                    <div class="ad-list-card">
+                        <div class="ad-list-card-left">
+                            <div class="ad-list-icon">{{ s.name[0].upper() }}</div>
+                            <div>
+                                <div class="ad-list-title">{{ s.name }}</div>
+                                <div class="ad-list-sub">{{ s.degree }} | {{ s.branch }} | CGPA: {{ s.cgpa }}</div>
+                            </div>
+                            {% if s.is_blacklisted %}
+                            <span class="ad-status-badge ad-status-blacklisted">Blacklisted</span>
+                            {% endif %}
+                        </div>
+                        <div class="ad-list-actions">
+                            <a href="{{ url_for('admin_student_detail', id=s.id) }}" class="btn-outline-custom ad-action-btn">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                            <a href="{{ url_for('blacklist_student', id=s.id) }}"
+                               class="ad-action-btn {% if s.is_blacklisted %}ad-btn-approve{% else %}ad-btn-warn{% endif %}">
+                                {% if s.is_blacklisted %}
+                                <i class="bi bi-unlock"></i> Unblacklist
+                                {% else %}
+                                <i class="bi bi-slash-circle"></i> Blacklist
+                                {% endif %}
+                            </a>
+                            <a href="{{ url_for('delete_student', id=s.id) }}"
+                               class="ad-action-btn ad-btn-reject"
+                               onclick="return confirm('Delete {{ s.name }}?')">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="ad-empty">
+                        <i class="bi bi-people"></i>
+                        <p>No students registered yet</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
 
-<div class="card">
-    <div class="card-header fw-bold">Registered Companies ({{ all_companies|length }})</div>
-    <div class="card-body scrollable">
-        {% if all_companies %}
-            {% for c in all_companies %}
-            <div class="d-flex justify-content-between border-bottom py-2">
-                <div>
-                    <strong>#{{ c.id }} {{ c.name }}</strong> | {{ c.email }}
-                    <span class="badge bg-success ms-1">Approved</span>
-                    {% if c.is_blacklisted %}<span class="badge bg-dark ms-1">Blacklisted</span>{% endif %}
-                </div>
-                <div>
-                    <a href="{{ url_for('admin_company_detail', id=c.id) }}" class="btn btn-sm btn-outline-primary">View</a>
-                    <a href="{{ url_for('blacklist_company', id=c.id) }}" class="btn btn-sm {% if c.is_blacklisted %}btn-outline-success{% else %}btn-outline-danger{% endif %}">
-                        {% if c.is_blacklisted %}Unblacklist{% else %}Blacklist{% endif %}
-                    </a>
+        <div class="ad-section">
+            <div class="ad-section-header">
+                <div class="ad-section-title">
+                    <i class="bi bi-briefcase-fill"></i>
+                    All Drives
+                    <span class="ad-count-badge">{{ all_drives|length }}</span>
                 </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-muted">No companies registered yet.</p>
-        {% endif %}
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-header fw-bold">Registered Students ({{ all_students|length }})</div>
-    <div class="card-body scrollable">
-        {% if all_students %}
-            {% for s in all_students %}
-            <div class="d-flex justify-content-between border-bottom py-2">
-                <div>
-                    <strong>#{{ s.id }} {{ s.name }}</strong> | {{ s.degree }} | {{ s.branch }} | CGPA: {{ s.cgpa }}
-                    {% if s.is_blacklisted %}<span class="badge bg-dark ms-1">Blacklisted</span>{% endif %}
-                </div>
-                <div>
-                    <a href="{{ url_for('admin_student_detail', id=s.id) }}" class="btn btn-sm btn-outline-primary">View</a>
-                    <a href="{{ url_for('blacklist_student', id=s.id) }}" class="btn btn-sm {% if s.is_blacklisted %}btn-outline-success{% else %}btn-outline-warning{% endif %}">
-                        {% if s.is_blacklisted %}Unblacklist{% else %}Blacklist{% endif %}
-                    </a>
-                    <a href="{{ url_for('delete_student', id=s.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete {{ s.name }}?')">Delete</a>
-                </div>
+            <div class="ad-list">
+                {% if all_drives %}
+                    {% for d in all_drives %}
+                    <div class="ad-list-card">
+                        <div class="ad-list-card-left">
+                            <div class="ad-list-icon">{{ d.job_title[0].upper() }}</div>
+                            <div>
+                                <div class="ad-list-title">{{ d.job_title }}</div>
+                                <div class="ad-list-sub">{{ d.company.name }} | {{ d.applications|length }} Applications</div>
+                            </div>
+                            <span class="ad-status-badge ad-status-{{ d.status | lower }}">{{ d.status }}</span>
+                        </div>
+                        <a href="{{ url_for('admin_drive_detail', id=d.id) }}" class="btn-outline-custom ad-action-btn">
+                            <i class="bi bi-eye"></i> View
+                        </a>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="ad-empty">
+                        <i class="bi bi-briefcase"></i>
+                        <p>No drives yet</p>
+                    </div>
+                {% endif %}
             </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-muted">No students registered yet.</p>
+        </div>
+
         {% endif %}
+
     </div>
 </div>
-
-<div class="card">
-    <div class="card-header fw-bold">All Drives ({{ all_drives|length }})</div>
-    <div class="card-body scrollable">
-        {% if all_drives %}
-            {% for d in all_drives %}
-            <div class="d-flex justify-content-between border-bottom py-2">
-                <div>
-                    <strong>#{{ d.id }} {{ d.job_title }}</strong> | {{ d.company.name }}
-                    <span class="badge {% if d.status == 'Approved' %}bg-success{% elif d.status == 'Pending' %}bg-warning text-dark{% elif d.status == 'Closed' %}bg-secondary{% else %}bg-danger{% endif %} ms-1">{{ d.status }}</span>
-                    | {{ d.applications|length }} Applications
-                </div>
-                <a href="{{ url_for('admin_drive_detail', id=d.id) }}" class="btn btn-sm btn-outline-primary">View</a>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-muted">No drives yet.</p>
-        {% endif %}
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-header fw-bold">Recent Applications ({{ all_applications|length }})</div>
-    <div class="card-body scrollable">
-        {% if all_applications %}
-            {% for a in all_applications %}
-            <div class="d-flex justify-content-between border-bottom py-2">
-                <div>
-                    <strong>{{ a.student.name }}</strong> | {{ a.drive.job_title }} | {{ a.drive.company.name }}
-                    <span class="badge {% if a.status == 'Selected' %}bg-success{% elif a.status == 'Shortlisted' %}bg-warning text-dark{% elif a.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %} ms-1">{{ a.status }}</span>
-                </div>
-                <a href="{{ url_for('admin_application_detail', id=a.id) }}" class="btn btn-sm btn-outline-primary">View</a>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-muted">No applications yet.</p>
-        {% endif %}
-    </div>
-</div>
-
-{% endif %}
 
 {% endblock %}

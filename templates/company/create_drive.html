@@ -1,47 +1,102 @@
 {% extends "base.html" %}
-{% block content %}
+{% block full_page %}
 
-<div class="d-flex justify-content-between mb-4">
-    <h4>Create New Drive</h4>
-    <a href="{{ url_for('company_dashboard') }}" class="btn btn-outline-secondary">Back</a>
-</div>
+<div class="co-root">
 
-
-
-<div class="card">
-    <div class= "card-body">
-        <form method="POST" action="{{ url_for('company_create_drive') }}">
-            <div class="mb-3">
-                <label class="form-label">Job Title</label>
-                <input type ="text" name="job_title" class ="form-control" required>
+    <div class="co-header">
+        <div class="co-header-left">
+            <div class="co-header-avatar">{{ company.name[0].upper() }}</div>
+            <div>
+                <div class="co-header-welcome">{{ company.name }}</div>
+                <div class="co-header-name">Create New Drive</div>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Job Description</label>
-                <textarea name="job_description" class="form-control" rows="3"></textarea>
-            </div>
-            <div class="mb-3">
-                <label class ="form-label">Eligibility</label>
-                <textarea name="eligibility" class ="form-control" rows="2"></textarea>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Salary</label>
-                <input type="text" name="salary" class="form-control">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Location</label>
-                <input type="text" name = "location" class= "form-control">
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Deadline</label>
-                <input type= "date" name="deadline" class="form-control">
-            </div>
-            <button type="submit" class="btn btn-primary">Save Drive</button>
-            <a href="{{ url_for('company_dashboard') }}" class= "btn btn-outline-secondary">Cancel</a>
-        </form>
-
+        </div>
+        <div class="co-header-right">
+            <a href="{{ url_for('company_dashboard') }}" class="btn-outline-custom">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-outline-custom">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
     </div>
 
-    
+    <div class="co-body">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="co-form-card">
+            <div class="co-form-title">Drive Information</div>
+            <div class="co-form-desc">Fill in the details below. The drive will be visible to students after admin approval.</div>
+
+            <form method="POST" action="{{ url_for('company_create_drive') }}">
+
+                <div class="input-field">
+                    <label>Job Title</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-briefcase"></i>
+                        <input type="text" name="job_title" placeholder="e.g. Software Engineer" required>
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label>Job Description</label>
+                    <div class="input-wrap co-textarea-wrap">
+                        <i class="bi bi-file-text"></i>
+                        <textarea name="job_description" rows="3" placeholder="Describe the role and responsibilities"></textarea>
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label>Eligibility</label>
+                    <div class="input-wrap co-textarea-wrap">
+                        <i class="bi bi-check-circle"></i>
+                        <textarea name="eligibility" rows="2" placeholder="e.g. B.Tech CSE, CGPA > 7.0"></textarea>
+                    </div>
+                </div>
+
+                <div class="co-form-row">
+                    <div class="input-field">
+                        <label>Salary</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-currency-rupee"></i>
+                            <input type="text" name="salary" placeholder="e.g. 6 LPA">
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Location</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-geo-alt"></i>
+                            <input type="text" name="location" placeholder="e.g. Bangalore">
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>Deadline</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-calendar"></i>
+                            <input type="date" name="deadline">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="co-form-btn-row">
+                    <button type="submit" class="btn-primary-custom">
+                        <i class="bi bi-check-lg"></i> Save Drive
+                    </button>
+                    <a href="{{ url_for('company_dashboard') }}" class="btn-outline-custom">Cancel</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
 </div>
 
-{% endblock %} 
+{% endblock %}

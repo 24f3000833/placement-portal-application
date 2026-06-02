@@ -1,63 +1,120 @@
 {% extends "base.html" %}
-{% block content %}
 
-<div class="d-flex justify-content-between mb-4">
-    <h4>Drive Details</h4>
-    <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">Back</a>
-</div>
+{% block full_page %}
 
-<div class="card">
-    <div class = "card-header fw-bold">{{ drive.job_title }} — {{ drive.company.name }}</div>
-    <div class ="card-body">
-        <table class="table table-bordered">
+<div class="st-root">
 
-            <tr>
-                <th style= "width:25%">Company</th>
-                <td>{{ drive.company.name }}</td>
-            </tr>
-            <tr>
-                <th>Job Title</th>
-                <td>{{ drive.job_title }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ drive.job_description or "Not provided" }}</td>
-            
-            </tr>
-            <tr>
-                
-                <th>Eligibility</th>
-                <td>{{ drive.eligibility or "Not provided" }}</td>
-            </tr>
-            <tr>
-                <th>Salary</th>
-                <td>{{ drive.salary or "Not provided" }}</td>
-            </tr>
-            <tr>
-                <th>Location</th>
-                <td>{{ drive.location or "Not provided" }}</td>
-            </tr>
-            <tr>
-
-                <th>Deadline</th>
-                <td>{{ drive.deadline or "Not provided" }}</td>
-                 
-            </tr>
-        </table>
-
-        {% if existing %}
-            <div class= "alert alert-info">
-                You have already applied. Status: <strong>{{ existing.status }}</strong>
+    <div class="st-header">
+        <div class="st-header-left">
+            <div class="st-header-avatar">{{ drive.company.name[0].upper() }}</div>
+            <div>
+                <div class="st-header-welcome">{{ drive.company.name }}</div>
+                <div class="st-header-name">{{ drive.job_title }}</div>
             </div>
-        {% else %}
-            <form method="POST" action="{{ url_for('student_apply', id=drive.id) }}">
-                <button type= "submit" class ="btn btn-primary">Apply Now</button>
-            </form>
-        {% endif %}
-
-        
+        </div>
+        <div class="st-header-right">
+            <a href="{{ url_for('student_dashboard') }}" class="btn-outline-custom">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-outline-custom">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
     </div>
 
+    <div class="st-body">
+
+        <div class="st-drive-grid">
+
+            <div class="st-drive-main">
+
+                <div class="st-drive-card">
+                    <div class="st-drive-card-header">
+                        <div class="st-dash-company-icon st-drive-company-icon-lg">{{ drive.company.name[0].upper() }}</div>
+                        <div>
+                            <div class="st-drive-job-title">{{ drive.job_title }}</div>
+                            <div class="st-drive-company-name">{{ drive.company.name }}</div>
+                        </div>
+                    </div>
+
+                    <div class="st-drive-meta-row">
+                        {% if drive.salary %}
+                        <span class="st-dash-meta-pill"><i class="bi bi-currency-rupee"></i> {{ drive.salary }}</span>
+                        {% endif %}
+                        {% if drive.location %}
+                        <span class="st-dash-meta-pill"><i class="bi bi-geo-alt"></i> {{ drive.location }}</span>
+                        {% endif %}
+                        {% if drive.deadline %}
+                        <span class="st-dash-meta-pill"><i class="bi bi-calendar"></i> {{ drive.deadline }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if drive.job_description %}
+                <div class="st-drive-info-card">
+                    <div class="st-drive-info-title"><i class="bi bi-file-text"></i> Job Description</div>
+                    <div class="st-drive-info-body">{{ drive.job_description }}</div>
+                </div>
+                {% endif %}
+
+                {% if drive.eligibility %}
+                <div class="st-drive-info-card">
+                    <div class="st-drive-info-title"><i class="bi bi-check-circle"></i> Eligibility</div>
+                    <div class="st-drive-info-body">{{ drive.eligibility }}</div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <div class="st-drive-sidebar">
+
+                <div class="st-drive-apply-card">
+                    {% if existing %}
+                        <div class="st-drive-applied-badge">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Already Applied
+                        </div>
+                        <div class="st-drive-status-row">
+                            <span class="st-drive-status-label">Current Status</span>
+                            <span class="st-dash-status-badge st-dash-status-{{ existing.status | lower }}">{{ existing.status }}</span>
+                        </div>
+                    {% else %}
+                        <div class="st-drive-apply-title">Ready to apply?</div>
+                        <div class="st-drive-apply-desc">Make sure your profile and resume are up to date before applying.</div>
+                        <form method="POST" action="{{ url_for('student_apply', id=drive.id) }}">
+                            <button type="submit" class="btn-primary-custom">
+                                <i class="bi bi-send"></i> Apply Now
+                            </button>
+                        </form>
+                        <a href="{{ url_for('student_profile') }}" class="btn-outline-custom st-drive-profile-btn">
+                            <i class="bi bi-pencil"></i> Update Profile First
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="st-drive-detail-card">
+                    <div class="st-drive-info-title">Drive Details</div>
+                    <div class="st-drive-detail-row">
+                        <span class="st-drive-detail-label">Company</span>
+                        <span class="st-drive-detail-value">{{ drive.company.name }}</span>
+                    </div>
+                    <div class="st-drive-detail-row">
+                        <span class="st-drive-detail-label">Location</span>
+                        <span class="st-drive-detail-value">{{ drive.location or 'Not provided' }}</span>
+                    </div>
+                    <div class="st-drive-detail-row">
+                        <span class="st-drive-detail-label">Salary</span>
+                        <span class="st-drive-detail-value">{{ drive.salary or 'Not provided' }}</span>
+                    </div>
+                    <div class="st-drive-detail-row">
+                        <span class="st-drive-detail-label">Deadline</span>
+                        <span class="st-drive-detail-value">{{ drive.deadline or 'Not provided' }}</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}

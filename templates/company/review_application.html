@@ -1,49 +1,105 @@
 {% extends "base.html" %}
-{% block content %}
+{% block full_page %}
 
-<div class="d-flex justify-content-between mb-4">
-    <h4>Review Application</h4>
-    <a href="{{ url_for('company_applicants', id=application.drive_id) }}" class="btn btn-outline-secondary">Back</a>
-</div>
+<div class="co-root">
 
-<div class="card">
-    <div class="card-header fw-bold">Applicant Information</div>
-    <div class="card-body">
-        <table class="table table-bordered">
-            <tr><th style="width:25%">Name</th><td>{{ application.student.name }}</td></tr>
-            <tr><th>Degree</th><td>{{ application.student.degree }}</td></tr>
-            <tr><th>Branch</th><td>{{ application.student.branch }}</td></tr>
-            <tr><th>CGPA</th><td>{{ application.student.cgpa }}</td></tr>
-            <tr><th>Phone</th><td>{{ application.student.phone }}</td></tr>
-            <tr><th>Drive</th><td>{{ application.drive.job_title }}</td></tr>
-            <tr><th>Applied On</th><td>{{ application.applied_at.strftime("%d %b %Y") }}</td></tr>
-            <tr>
-                <th>Status</th>
-                <td>
-                    <span class="badge {% if application.status == 'Selected' %}bg-success{% elif application.status == 'Shortlisted' %}bg-warning text-dark{% elif application.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %}">{{ application.status }}</span>
-                </td>
-            </tr>
-        </table>
-        <a href="{{ url_for('uploaded_resume', filename=application.student.resume) }}" target="_blank" class="btn btn-outline-primary">View Resume</a>
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-header fw-bold">Update Status</div>
-    <div class="card-body">
-        <form method="POST" action="{{ url_for('company_review_application', id=application.id) }}">
-            <div class="mb-3">
-                <label class="form-label">New Status</label>
-                <select name="status" class="form-select" required>
-                    <option value="Applied" {% if application.status == 'Applied' %}selected{% endif %}>Applied</option>
-                    <option value="Shortlisted" {% if application.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
-                    <option value="Selected" {% if application.status == 'Selected' %}selected{% endif %}>Selected</option>
-                    <option value="Rejected" {% if application.status == 'Rejected' %}selected{% endif %}>Rejected</option>
-                </select>
+    <div class="co-header">
+        <div class="co-header-left">
+            <div class="co-header-avatar">{{ company.name[0].upper() }}</div>
+            <div>
+                <div class="co-header-welcome">{{ company.name }}</div>
+                <div class="co-header-name">Review Application</div>
             </div>
-            <button type="submit" class="btn btn-primary">Update Status</button>
-            <a href="{{ url_for('company_applicants', id=application.drive_id) }}" class="btn btn-outline-secondary">Cancel</a>
-        </form>
+        </div>
+        <div class="co-header-right">
+            <a href="{{ url_for('company_applicants', id=application.drive_id) }}" class="btn-outline-custom">
+                <i class="bi bi-arrow-left"></i> Back to Applicants
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-outline-custom">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="co-body">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="co-review-grid">
+
+            <div class="co-review-info-card">
+                <div class="co-review-avatar">{{ application.student.name[0].upper() }}</div>
+                <div class="co-review-name">{{ application.student.name }}</div>
+                <div class="co-review-drive">Applied for {{ application.drive.job_title }}</div>
+                <span class="co-dash-status-badge co-dash-status-{{ application.status | lower }}">{{ application.status }}</span>
+
+                <div class="co-review-detail-list">
+                    <div class="co-review-detail-row">
+                        <span class="co-review-detail-label">Degree</span>
+                        <span class="co-review-detail-value">{{ application.student.degree }}</span>
+                    </div>
+                    <div class="co-review-detail-row">
+                        <span class="co-review-detail-label">Branch</span>
+                        <span class="co-review-detail-value">{{ application.student.branch }}</span>
+                    </div>
+                    <div class="co-review-detail-row">
+                        <span class="co-review-detail-label">CGPA</span>
+                        <span class="co-review-detail-value">{{ application.student.cgpa }}</span>
+                    </div>
+                    <div class="co-review-detail-row">
+                        <span class="co-review-detail-label">Phone</span>
+                        <span class="co-review-detail-value">{{ application.student.phone or 'N/A' }}</span>
+                    </div>
+                    <div class="co-review-detail-row">
+                        <span class="co-review-detail-label">Applied On</span>
+                        <span class="co-review-detail-value">{{ application.applied_at.strftime("%d %b %Y") }}</span>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('uploaded_resume', filename=application.student.resume) }}"
+                   target="_blank" class="btn-outline-custom co-review-resume-btn">
+                    <i class="bi bi-file-earmark-pdf"></i> View Resume
+                </a>
+            </div>
+
+            <div class="co-review-form-card">
+                <div class="co-form-title">Update Application Status</div>
+                <div class="co-form-desc">Change the status based on your review of the applicant.</div>
+
+                <form method="POST" action="{{ url_for('company_review_application', id=application.id) }}">
+
+                    <div class="input-field">
+                        <label>New Status</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-arrow-repeat"></i>
+                            <select name="status" required>
+                                <option value="Applied"     {% if application.status == 'Applied'     %}selected{% endif %}>Applied</option>
+                                <option value="Shortlisted" {% if application.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                                <option value="Selected"    {% if application.status == 'Selected'    %}selected{% endif %}>Selected</option>
+                                <option value="Rejected"    {% if application.status == 'Rejected'    %}selected{% endif %}>Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="co-form-btn-row">
+                        <button type="submit" class="btn-primary-custom">
+                            <i class="bi bi-check-lg"></i> Update Status
+                        </button>
+                        <a href="{{ url_for('company_applicants', id=application.drive_id) }}" class="btn-outline-custom">Cancel</a>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>
     </div>
 </div>
 

@@ -1,47 +1,90 @@
 {% extends "base.html" %}
-{% block content %}
+{% block full_page %}
 
-<div class="d-flex justify-content-between mb-4">
-    <h4>My Applications</h4>
-    <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">Back</a>
-</div>
+<div class="st-root">
 
-<div class ="card">
+    <div class="st-header">
+        <div class="st-header-left">
+            <div class="st-header-avatar">{{student.name[0].upper() }}</div>
+            <div>
+                <div class="'st-header-welcome">Tracking Progress</div>
+                <div class="st-header-name">{{student.name}}</div>
+            </div>
+            <div>
+                <div class="st-header-welcome">Tracking progress</div>
+                <div class="st-header-name">My Applications</div>
+            </div>
+        </div>
+        <div class="st-header-right">
+            <a href="{{ url_for('student_dashboard') }}" class="btn-outline-custom">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-outline-custom">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </a>
+        </div>
+    </div>
 
-    <div class="card-body">
-        {% if applications %}
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
+    <div class="st-body">
 
-                        <th>#</th>
-                        <th>Drive</th>
-                        <th>Company</th>
-                        <th>Applied On</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for app in applications %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ app.drive.job_title }}</td>
-                        <td>{{ app.drive.company.name }}</td>
-                        <td>{{ app.applied_at.strftime("%d %b %Y") }}</td>
-                        <td>
-
-                            <span class="badge {% if app.status == 'Selected' %}bg-success{% elif app.status == 'Shortlisted' %}bg-warning text-dark{% elif app.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %}">{{ app.status }}</span>
-
-                        </td>
-                    </tr>
+        <div class="st-app-section">
+            <div class="st-app-section-header">
+                <div class="st-dash-section-title">
+                    <i class="bi bi-send-fill"></i>
+                    All Applications
+                    <span class="st-dash-count-badge">{{ applications|length }}</span>
+                </div>
+                <div class="st-dash-filter-row">
+                    {% for s in ['all', 'Pending', 'Shortlisted', 'Selected', 'Rejected'] %}
+                    <a href="{{ url_for('student_applications', status=s) }}"
+                       class="st-dash-filter-btn {% if status_filter == s %}active{% endif %}">
+                        {{ s|capitalize }}
+                    </a>
                     {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p class= "text-muted">No applications yet.</p>
-        {% endif %}
+                </div>
+            </div>
+
+            {% if applications %}
+            <div class="st-app-table-wrap">
+                <table class="st-app-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Drive</th>
+                            <th>Company</th>
+                            <th>Applied On</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in applications %}
+                        <tr>
+                            <td class="st-app-index">{{ loop.index }}</td>
+                            <td class="st-app-title">{{ app.drive.job_title }}</td>
+                            <td class="st-app-company">
+                                <div class="st-app-company-row">
+                                    <div class="st-dash-company-icon">{{ app.drive.company.name[0].upper() }}</div>
+                                    {{ app.drive.company.name }}
+                                </div>
+                            </td>
+                            <td class="st-app-date">{{ app.applied_at.strftime("%d %b %Y") }}</td>
+                            <td>
+                                <span class="st-dash-status-badge st-dash-status-{{ app.status | lower }}">{{ app.status }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <div class="st-dash-empty">
+                    <i class="bi bi-file-earmark-x"></i>
+                    <p>No applications yet</p>
+                </div>
+            {% endif %}
+
+        </div>
     </div>
 </div>
-
 
 {% endblock %}
