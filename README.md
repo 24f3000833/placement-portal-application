@@ -121,7 +121,6 @@ Placement_Portal/
         ├── student_detail.html
         ├── company_detail.html
         ├── drive_detail.html
-        └── application_detail.html
 ```
 
 ## Installation and Setup

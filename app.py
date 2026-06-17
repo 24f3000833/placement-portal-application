@@ -3,7 +3,10 @@ from models import db , Admin , Company , Student , PlacementDrive, Application
 from werkzeug.security import generate_password_hash , check_password_hash
 from werkzeug.utils import secure_filename
 import os
-from datetime import datetime , date
+from datetime import datetime , date , timedelta
+from flask_mail import Mail, Message
+from dotenv import load_dotenv
+import secrets
 
 
 app= Flask(__name__)
@@ -14,6 +17,27 @@ app.config["UPLOAD_FOLDER"]="static/upload"  #Stores the uploaded file (certific
 app.config["MAX_CONTENT_LENGTH"]=16*1024*1024   #Max file upload size = 16MB 
 
 
+
+load_dotenv()
+
+#Mail configuration
+app.config["MAIL_SERVER"]="smtp.gmail.com"
+app.config["MAIL_PORT"]=587
+app.config["MAIL_USE_TLS"]=True
+app.config["MAIL_USERNAME"]=os.environ.get("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"]=os.environ.get("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"]=os.environ.get("MAIL_USERNAME")
+
+mail=Mail(app)
+
+
+
+#Sends a plain email - reused everywhere we need to notify someone
+def send_email(to, subject, body):
+    msg=Message(subject=subject, recipients=[to], body=body)
+    mail.send(msg)
+
+
 db.init_app(app)
 
 
@@ -21,7 +45,7 @@ db.init_app(app)
 @app.route("/")
 def home():
     student_count = Student.query.count()
-    company_count = Company.query.filter_by(approval_status=True).count()
+    company_count = Company.query.filter_by(approval_status="Approved").count()
     drive_count = PlacementDrive.query.filter_by(status="Active").count()
     return render_template("home.html",
         student_count=student_count,
@@ -107,46 +131,95 @@ def admin_login():
 @app.route("/register/student" , methods=["GET", "POST"])
 def register_student():
     if request.method=="POST":
-        name=request.form.get("name","")
-        email=request.form.get("email","")
-        password=request.form.get("password","")
-        phone=request.form.get("phone","")
-        degree=request.form.get("degree","")
-        branch=request.form.get("branch","")
-        cgpa=request.form.get("cgpa","")
-        resume=request.files.get("resume")
+        stage=request.form.get("stage","")
 
-        existing=Student.query.filter_by(email=email).first()
-        if existing:
-            flash("Email alrerady registered","danger")
-            return redirect(url_for("register_student"))
-        
-        if resume:
-            filename=secure_filename(resume.filename)
-            resume_folder=os.path.join(app.config["UPLOAD_FOLDER"],"resumes")
-            os.makedirs(resume_folder , exist_ok=True)
-            resume.save(os.path.join(resume_folder, filename))
-        else:
-            flash("Please upload your resume","danger")
-            return redirect(url_for("register_student"))
-        
-        hashed_password=generate_password_hash(password)
-        student=Student(
-            name=name,
-            email=email,
-            password=hashed_password,
-            phone=phone,
-            degree=degree,
-            branch=branch,
-            cgpa=float(cgpa),
-            resume=filename
-        )
-        db.session.add(student)
-        db.session.commit()
+        if stage=="send_otp":
+            email=request.form.get("email","")
 
-        flash("Registration Successful..Please login to continue","success")
-        return redirect(url_for("login"))
-    return render_template("auth/register_student.html")
+            existing=Student.query.filter_by(email=email).first()
+            if existing:
+                flash("Email alrerady registered","danger")
+                return redirect(url_for("register_student"))
+
+            otp=str(secrets.randbelow(900000)+100000)
+            session["reg_otp"]=otp
+            session["reg_otp_email"]=email
+            session["reg_otp_time"]=datetime.utcnow().isoformat()
+
+            print("Sending OTP to:", email)
+            send_email(to=email, subject="Your Placify Account Registration", body=f"""Hello,
+Thank you for registering on the Placify portal. 
+
+To complete your account setup, please use the following confirmation code:  {otp}
+
+This code is valid for the next 10 minutes. If you did not request this, you can safely ignore this message.
+
+Best regards,
+The Placify Team""")
+            flash("OTP sent to your email","success")
+            return render_template("auth/register_student.html", stage="otp", email=email)
+
+        elif stage=="verify_otp":
+            entered_otp=request.form.get("otp","")
+            email=request.form.get("email","")
+
+            otp_time=datetime.fromisoformat(session.get("reg_otp_time","2000-01-01T00:00:00"))
+            if datetime.utcnow()-otp_time > timedelta(minutes=10):
+                flash("OTP expired, please try again","danger")
+                return redirect(url_for("register_student"))
+
+            if entered_otp==session.get("reg_otp") and email==session.get("reg_otp_email"):
+                session["reg_email_verified"]=True
+                flash("Email verified! Complete your registration","success")
+                return render_template("auth/register_student.html", stage="details", email=email)
+            else:
+                flash("Incorrect OTP","danger")
+                return render_template("auth/register_student.html", stage="otp", email=email)
+
+        elif stage=="complete":
+            email=request.form.get("email","")
+
+            if not session.get("reg_email_verified") or session.get("reg_otp_email")!=email:
+                flash("Please verify your email first","danger")
+                return redirect(url_for("register_student"))
+
+            name=request.form.get("name","")
+            email=request.form.get("email","")
+            password=request.form.get("password","")
+            phone=request.form.get("phone","")
+            degree=request.form.get("degree","")
+            branch=request.form.get("branch","")
+            cgpa=request.form.get("cgpa","")
+            resume=request.files.get("resume")
+
+        
+        
+            if resume:
+                filename=secure_filename(resume.filename)
+                resume_folder=os.path.join(app.config["UPLOAD_FOLDER"],"resumes")
+                os.makedirs(resume_folder , exist_ok=True)
+                resume.save(os.path.join(resume_folder, filename))
+            else:
+               flash("Please upload your resume","danger")
+               return redirect(url_for("register_student",stage="details", email=email))
+        
+            hashed_password=generate_password_hash(password)
+            student=Student(
+                name=name,
+                email=email,
+                password=hashed_password,
+                phone=phone,
+                degree=degree,
+                branch=branch,
+                cgpa=float(cgpa),
+                resume=filename
+            )
+            db.session.add(student)
+            db.session.commit()
+
+            flash("Registration Successful..Please login to continue","success")
+            return redirect(url_for("login"))
+    return render_template("auth/register_student.html", stage="email")
 
 
 
@@ -402,16 +475,6 @@ def admin_drive_detail(id):
     return render_template("admin/drive_detail.html",
         drive=drive,
         applications=applications
-    )
-
-@app.route("/admin/application/<int:id>")
-def admin_application_detail(id):
-    if "user_id" not in session or session["role"] != "admin":
-        flash("Please login as Admin", "danger")
-        return redirect(url_for("admin_login"))
-    application = Application.query.get_or_404(id)
-    return render_template("admin/application_detail.html",
-        application=application
     )
 
 

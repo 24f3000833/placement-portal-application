@@ -55,21 +55,63 @@
             <h3>Create account</h3>
             <p class="login-subtitle">Fill in your details to get started</p>
 
+
             <form method="POST" action="{{ url_for('register_student') }}" enctype="multipart/form-data">
 
-                <div class="input-field">
-                    <label>Full Name</label>
-                    <div class="input-wrap">
-                        <i class="bi bi-person"></i>
-                        <input type="text" name="name" placeholder="Your full name" required>
-                    </div>
-                </div>
+                {% if stage == "email" %}
+                <input type="hidden" name="stage" value="send_otp">
 
                 <div class="input-field">
                     <label>Email</label>
                     <div class="input-wrap">
                         <i class="bi bi-envelope"></i>
                         <input type="email" name="email" placeholder="your@email.com" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary-custom">
+                    Send OTP <i class="bi bi-arrow-right"></i>
+                </button>
+
+                {% elif stage == "otp" %}
+                <input type="hidden" name="stage" value="verify_otp">
+
+                <div class="input-field">
+                    <label>Email</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope"></i>
+                        <input type="email" name="email" value="{{ email }}" readonly required>
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label>Enter OTP</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-shield-lock"></i>
+                        <input type="text" name="otp" placeholder="6-digit code" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary-custom">
+                    Verify OTP <i class="bi bi-arrow-right"></i>
+                </button>
+
+                {% elif stage == "details" %}
+                <input type="hidden" name="stage" value="complete">
+
+                <div class="input-field">
+                    <label>Email</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-envelope"></i>
+                        <input type="email" name="email" value="{{ email }}" readonly required>
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label>Full Name</label>
+                    <div class="input-wrap">
+                        <i class="bi bi-person"></i>
+                        <input type="text" name="name" placeholder="Your full name" required>
                     </div>
                 </div>
 
@@ -133,7 +175,10 @@
                     Register <i class="bi bi-arrow-right"></i>
                 </button>
 
+                {% endif %}
+
             </form>
+
 
             <div class="page-footer-link">
                 <span>Already have an account?</span>
