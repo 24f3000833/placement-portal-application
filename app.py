@@ -7,18 +7,35 @@ from datetime import datetime , date , timedelta
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
 import secrets
-
-
-app= Flask(__name__)
-app.config["SECRET_KEY"]="placementportaljan26"  #USed to encrypt session data and keeps login into safe
-app.config["SQLALCHEMY_DATABASE_URI"]= "sqlite:///placement.db"  #CReate placement.db file and store all 5 tables 
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False  #Removes unneccessary features and saves memory anbd time
-app.config["UPLOAD_FOLDER"]="static/upload"  #Stores the uploaded file (certificate and resumnes)
-app.config["MAX_CONTENT_LENGTH"]=16*1024*1024   #Max file upload size = 16MB 
-
+import cloudinary
+import cloudinary.uploader
 
 
 load_dotenv()
+app= Flask(__name__)
+
+
+app.config["SECRET_KEY"]=os.environ.get("SECRET_KEY")  #USed to encrypt session data and keeps login into safe
+
+#Switch database(local and cloud)
+db_url = os.environ.get("DATABASE_URL", "sqlite:///placement.db")
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False  #Removes unneccessary features and saves memory anbd time
+app.config["UPLOAD_FOLDER"]="static/upload"  #Stores the uploaded file (certificate and resumnes)
+app.config["MAX_CONTENT_LENGTH"]=16*1024*1024   #Max file upload size = 16MB 
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+
+
+cloudinary.config(
+    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.environ.get('CLOUDINARY_API_KEY'),
+    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
+)
+
+
 
 #Mail configuration
 app.config["MAIL_SERVER"]="smtp.gmail.com"
@@ -30,15 +47,13 @@ app.config["MAIL_DEFAULT_SENDER"]=os.environ.get("MAIL_USERNAME")
 
 mail=Mail(app)
 
+db.init_app(app)
 
 
 #Sends a plain email - reused everywhere we need to notify someone
 def send_email(to, subject, body):
     msg=Message(subject=subject, recipients=[to], body=body)
     mail.send(msg)
-
-
-db.init_app(app)
 
 
 #Home Route
@@ -194,11 +209,15 @@ The Placify Team""")
 
         
         
-            if resume:
-                filename=secure_filename(resume.filename)
-                resume_folder=os.path.join(app.config["UPLOAD_FOLDER"],"resumes")
-                os.makedirs(resume_folder , exist_ok=True)
-                resume.save(os.path.join(resume_folder, filename))
+            if resume and resume.filename != "":
+                if os.environ.get("DATABASE_URL"):
+                    upload_result = cloudinary.uploader.upload(resume, folder="resumes", resource_type="auto")
+                    filename = upload_result.get("secure_url")
+                else:
+                    filename = secure_filename(resume.filename)
+                    resume_folder = os.path.join(app.config["UPLOAD_FOLDER"], "resumes")
+                    os.makedirs(resume_folder, exist_ok=True)
+                    resume.save(os.path.join(resume_folder, filename))
             else:
                flash("Please upload your resume","danger")
                return redirect(url_for("register_student",stage="details", email=email))
@@ -238,11 +257,15 @@ def register_company():
             flash("Email alrerady registered","danger")
             return redirect(url_for("register_company"))
         
-        if certificate:
-            filename=secure_filename(certificate.filename)
-            certificate_folder=os.path.join(app.config["UPLOAD_FOLDER"],"certificates")
-            os.makedirs(certificate_folder , exist_ok=True)
-            certificate.save(os.path.join(certificate_folder, filename))
+        if certificate and certificate.filename != "":
+            if os.environ.get("DATABASE_URL"):
+                upload_result = cloudinary.uploader.upload(certificate, folder="certificates", resource_type="auto")
+                filename = upload_result.get("secure_url")
+            else:
+                filename = secure_filename(certificate.filename)
+                certificate_folder = os.path.join(app.config["UPLOAD_FOLDER"], "certificates")
+                os.makedirs(certificate_folder, exist_ok=True)
+                certificate.save(os.path.join(certificate_folder, filename))
         else:
             flash("Please upload your Certificate","danger")
             return redirect(url_for("register_company"))
@@ -726,11 +749,15 @@ def student_profile():
         student.cgpa = float(request.form.get("cgpa", 0))
         resume = request.files.get("resume")
         if resume and resume.filename != "":
-            filename = secure_filename(resume.filename)
-            resume_folder = os.path.join(app.config["UPLOAD_FOLDER"], "resumes")
-            os.makedirs(resume_folder, exist_ok=True)
-            resume.save(os.path.join(resume_folder, filename))
-            student.resume = filename
+            if os.environ.get("DATABASE_URL"):
+                upload_result = cloudinary.uploader.upload(resume, folder="resumes", resource_type="auto")
+                student.resume = upload_result.get("secure_url")
+            else:
+                filename = secure_filename(resume.filename)
+                resume_folder = os.path.join(app.config["UPLOAD_FOLDER"], "resumes")
+                os.makedirs(resume_folder, exist_ok=True)
+                resume.save(os.path.join(resume_folder, filename))
+                student.resume = filename
         db.session.commit()
         flash("Profile updated successfully!", "success")
         return redirect(url_for("student_profile"))
