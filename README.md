@@ -6,7 +6,8 @@ The Placement Portal System is a web-based application designed to streamline th
 
 The portal simplifies communication between students and recruiters and helps institutes manage placement activities digitally.
 
-
+## 🔗 Project Link
+Check out the live application here: [Placement Portal Live](https://placement-portal-application-anshul8.vercel.app/)
 
 ## Features
 
