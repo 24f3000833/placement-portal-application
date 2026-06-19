@@ -64,9 +64,9 @@
                     </div>
                 </div>
 
-                <a href="{{ url_for('uploaded_resume', filename=application.student.resume) }}"
-                   target="_blank" class="btn-outline-custom co-review-resume-btn">
-                    <i class="bi bi-file-earmark-pdf"></i> View Resume
+                <a href="{{ application.student.resume }}"
+                    target="_blank" rel="noopener noreferrer" class="btn-outline-custom co-review-resume-btn">
+                        <i class="bi bi-file-earmark-pdf"></i> View Resume
                 </a>
             </div>
 

@@ -59,9 +59,9 @@
                     </div>
                 </div>
 
-                <a href="{{ url_for('uploaded_certificate', filename=company.certificate) }}"
-                   target="_blank" class="btn-outline-custom ad-detail-full-btn">
-                    <i class="bi bi-file-earmark-pdf"></i> View Certificate
+                <a href="{{ company.certificate }}" 
+                    target="_blank" rel="noopener noreferrer" class="btn-outline-custom ad-detail-full-btn">
+                        <i class="bi bi-file-earmark-pdf"></i> View Certificate
                 </a>
 
                 <div class="ad-detail-actions">

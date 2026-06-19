@@ -158,7 +158,7 @@
                                 </div>
                             </div>
                             <div class="ad-list-actions">
-                                <a href="{{ url_for('uploaded_certificate', filename=c.certificate) }}" target="_blank" class="btn-outline-custom ad-action-btn">
+                                <a href="{{ c.certificate }}" target="_blank" rel="noopener noreferrer" class="btn-outline-custom ad-action-btn">
                                     <i class="bi bi-file-earmark-pdf"></i>
                                 </a>
                                 <a href="{{ url_for('admin_company_detail', id=c.id) }}" class="btn-outline-custom ad-action-btn">

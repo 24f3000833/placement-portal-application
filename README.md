@@ -52,12 +52,21 @@ Check out the live application here: [Placement Portal Live](https://placement-p
 
 ### Database
 
-* SQLite
+* PostgreSQL on Neon (production) / SQLite (local development)
 * SQLAlchemy ORM
 
 ### Security
 
 * Password hashing using Werkzeug
+* OTP bases student registration
+
+### Cloud Storage
+
+* Cloudinary
+
+### Deployment
+
+*Vercel
 
 
 ## Database Entities
@@ -78,16 +87,15 @@ The system consists of the following main entities:
 * The Application table acts as a junction table to resolve the many-to-many relationship between students and placement drives.
 
 
+### Project Structure
 
-## Project Structure
-
-```
-Placement_Portal/
+placify/
 │
 ├── app.py
 ├── models.py
 ├── init_db.py
 ├── requirements.txt
+├── vercel.json
 ├── README.md
 │
 ├── static/
@@ -95,8 +103,9 @@ Placement_Portal/
 │   │   ├── global.css
 │   │   ├── auth.css
 │   │   ├── home.css
-│   │   
-│   └── upload/
+│   │   ├── admin.css
+│   │   ├── student.css
+│   │   └── company.css
 │
 └── templates/
     ├── base.html
@@ -122,7 +131,6 @@ Placement_Portal/
         ├── student_detail.html
         ├── company_detail.html
         ├── drive_detail.html
-```
 
 ## Installation and Setup
 
@@ -136,27 +144,30 @@ git clone https://github.com/24f3000833/placement-portal-application.git
 
 pip install -r requirements.txt
 
-### 3. Initialize the Database
+### 3. Create an .env file
 
-python init_db.py
+SECRET_KEY=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+MAIL_USERNAME=
+MAIL_PASSWORD=
+DATABASE_URL=
 
-### 4. Run the Application
+* DATABASE_URL is only needed for production PostgreSQL. Skip it locally and SQLite will be used automatically.
+
+### 4 Initialize the database
+
+python init_db.py 
+
+### 5. Run the Application
 
 python app.py
 
-### 5. Open in Browser
+### 6. Open in Browser
 
 http://127.0.0.1:5000
 
-
-
-## Future Enhancements
-
-* Email notification system for students
-* Resume filtering based on eligibility
-* Interview scheduling system
-* Analytics dashboard for placement statistics
-* Advanced search and filtering for placement drives
 
 
 ## Author

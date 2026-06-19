@@ -1,7 +1,6 @@
-from flask import Flask , render_template , request, redirect,url_for,session , flash , Response , send_from_directory
+from flask import Flask , render_template , request, redirect,url_for,session , flash , Response
 from models import db , Admin , Company , Student , PlacementDrive, Application
 from werkzeug.security import generate_password_hash , check_password_hash
-from werkzeug.utils import secure_filename
 import os
 from datetime import datetime , date , timedelta
 from flask_mail import Mail, Message
@@ -9,6 +8,8 @@ from dotenv import load_dotenv
 import secrets
 import cloudinary
 import cloudinary.uploader
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 
 load_dotenv()
@@ -24,7 +25,6 @@ if db_url.startswith("postgres://"):
 
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False  #Removes unneccessary features and saves memory anbd time
-app.config["UPLOAD_FOLDER"]="static/upload"  #Stores the uploaded file (certificate and resumnes)
 app.config["MAX_CONTENT_LENGTH"]=16*1024*1024   #Max file upload size = 16MB 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
 
@@ -46,7 +46,7 @@ app.config["MAIL_PASSWORD"]=os.environ.get("MAIL_PASSWORD")
 app.config["MAIL_DEFAULT_SENDER"]=os.environ.get("MAIL_USERNAME")
 
 mail=Mail(app)
-
+limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"])
 db.init_app(app)
 
 
@@ -61,7 +61,7 @@ def send_email(to, subject, body):
 def home():
     student_count = Student.query.count()
     company_count = Company.query.filter_by(approval_status="Approved").count()
-    drive_count = PlacementDrive.query.filter_by(status="Active").count()
+    drive_count = PlacementDrive.query.filter_by(status="Approved").count()
     return render_template("home.html",
         student_count=student_count,
         company_count=company_count,
@@ -144,6 +144,7 @@ def admin_login():
 
 #Student registration
 @app.route("/register/student" , methods=["GET", "POST"])
+@limiter.limit("5 per minute")
 def register_student():
     if request.method=="POST":
         stage=request.form.get("stage","")
@@ -210,17 +211,24 @@ The Placify Team""")
         
         
             if resume and resume.filename != "":
-                if os.environ.get("DATABASE_URL"):
+                try:
                     upload_result = cloudinary.uploader.upload(resume, folder="resumes", resource_type="auto")
                     filename = upload_result.get("secure_url")
-                else:
-                    filename = secure_filename(resume.filename)
-                    resume_folder = os.path.join(app.config["UPLOAD_FOLDER"], "resumes")
-                    os.makedirs(resume_folder, exist_ok=True)
-                    resume.save(os.path.join(resume_folder, filename))
+                except Exception as e:
+                    flash("Resume upload failed. Please try again.", "danger")
+                    return render_template("auth/register_student.html", stage="details", email=email)
             else:
-               flash("Please upload your resume","danger")
-               return redirect(url_for("register_student",stage="details", email=email))
+                flash("Please upload your resume", "danger")
+                return render_template("auth/register_student.html", stage="details", email=email)
+            
+            try:
+                cgpa_value = float(cgpa)
+                if cgpa_value < 0 or cgpa_value > 10:
+                    flash("CGPA must be between 0 and 10.", "danger")
+                    return render_template("auth/register_student.html", stage="details", email=email)
+            except ValueError:
+                flash("Invalid CGPA value.", "danger")
+                return render_template("auth/register_student.html", stage="details", email=email)
         
             hashed_password=generate_password_hash(password)
             student=Student(
@@ -230,7 +238,7 @@ The Placify Team""")
                 phone=phone,
                 degree=degree,
                 branch=branch,
-                cgpa=float(cgpa),
+                cgpa=cgpa_value,
                 resume=filename
             )
             db.session.add(student)
@@ -258,16 +266,14 @@ def register_company():
             return redirect(url_for("register_company"))
         
         if certificate and certificate.filename != "":
-            if os.environ.get("DATABASE_URL"):
+            try:
                 upload_result = cloudinary.uploader.upload(certificate, folder="certificates", resource_type="auto")
                 filename = upload_result.get("secure_url")
-            else:
-                filename = secure_filename(certificate.filename)
-                certificate_folder = os.path.join(app.config["UPLOAD_FOLDER"], "certificates")
-                os.makedirs(certificate_folder, exist_ok=True)
-                certificate.save(os.path.join(certificate_folder, filename))
+            except Exception as e:
+                flash("Certificate upload failed. Please try again.", "danger")
+                return redirect(url_for("register_company"))
         else:
-            flash("Please upload your Certificate","danger")
+            flash("Please upload your Certificate", "danger")
             return redirect(url_for("register_company"))
         
         hashed_password=generate_password_hash(password)
@@ -501,14 +507,7 @@ def admin_drive_detail(id):
     )
 
 
-#####################################################################################3
 
-#LogOut
-@app.route("/logout")
-def logout():
-    session.clear()
-    flash("Logged out successfully","success")
-    return redirect(url_for("login"))
 
 #####################################################################################
 
@@ -723,7 +722,10 @@ def student_applications():
         flash("Please login as Student", "danger")
         return redirect(url_for("login"))
     student = Student.query.get(session["user_id"])
+    ALLOWED_STATUSES = ["Applied", "Shortlisted", "Selected", "Rejected"]
     status_filter = request.args.get("status", "all")
+    if status_filter != "all" and status_filter not in ALLOWED_STATUSES:
+        status_filter = "all"
     apps_query = Application.query.filter_by(student_id=student.id)
     if status_filter != "all":
         apps_query = apps_query.filter_by(status=status_filter)
@@ -746,33 +748,40 @@ def student_profile():
         student.phone = request.form.get("phone", "")
         student.degree = request.form.get("degree", "")
         student.branch = request.form.get("branch", "")
-        student.cgpa = float(request.form.get("cgpa", 0))
+        try:
+            cgpa_value = float(request.form.get("cgpa", 0))
+            if cgpa_value < 0 or cgpa_value > 10:
+                flash("CGPA must be between 0 and 10.", "danger")
+                return redirect(url_for("student_profile"))
+        except ValueError:
+            flash("Invalid CGPA value.", "danger")
+            return redirect(url_for("student_profile"))
+        student.cgpa = cgpa_value
         resume = request.files.get("resume")
         if resume and resume.filename != "":
-            if os.environ.get("DATABASE_URL"):
+            try:
                 upload_result = cloudinary.uploader.upload(resume, folder="resumes", resource_type="auto")
                 student.resume = upload_result.get("secure_url")
-            else:
-                filename = secure_filename(resume.filename)
-                resume_folder = os.path.join(app.config["UPLOAD_FOLDER"], "resumes")
-                os.makedirs(resume_folder, exist_ok=True)
-                resume.save(os.path.join(resume_folder, filename))
-                student.resume = filename
+            except Exception as e:
+                flash("Resume upload failed. Please try again.", "danger")
+                return redirect(url_for("student_profile"))
         db.session.commit()
         flash("Profile updated successfully!", "success")
         return redirect(url_for("student_profile"))
     return render_template("student/profile.html", student=student)
 
-#########################################################3
+#########################################################
 
-@app.route("/upload/resumes/<filename>")
-def uploaded_resume(filename):
-    return send_from_directory("static/upload/resumes", filename)
 
-@app.route("/upload/certificates/<filename>")
-def uploaded_certificate(filename):
-    return send_from_directory("static/upload/certificates", filename)
+#LogOut
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("Logged out successfully","success")
+    return redirect(url_for("login"))
 
+
+###########################################################
 
 if __name__=="__main__":
     app.run(debug=True)
