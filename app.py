@@ -27,6 +27,7 @@ if db_url.startswith("postgres://"):
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"]=False  #Removes unneccessary features and saves memory anbd time
 app.config["MAX_CONTENT_LENGTH"]=16*1024*1024   #Max file upload size = 16MB 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+app.config["RATELIMIT_STORAGE_URI"] = "memory://"
 
 
 cloudinary.config(

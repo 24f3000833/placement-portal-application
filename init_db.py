@@ -12,12 +12,11 @@ with app.app_context():
     admin = Admin.query.filter_by(username=os.environ.get("ADMIN_USERNAME")).first()
 
     if not admin:
-        hashed_pass=generate_password_hash(os.environ.get("ADMIN_PASSWOD"))
+        hashed_pass=generate_password_hash(os.environ.get("ADMIN_PASSWORD"))
         admin=Admin(username=os.environ.get("ADMIN_USERNAME"), password=hashed_pass) #Stores admin detail in admin table
         db.session.add(admin)
         db.session.commit()
         print("Databse created Successfully...\nPrint Admin account created..")
-        print("Username : admin\n Password : admin123")
     else:
         print("Database already exist..\nAdmin Already exist!!")
     
