@@ -86,6 +86,30 @@
                         </div>
                     </div>
                 </div>
+                <div class="co-form-title" style="margin-top:1.5rem">HR Contact</div>
+                <div class="co-form-row">
+                    <div class="input-field">
+                        <label>HR Name</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-person"></i>
+                            <input type="text" name="hr_name" value="{{ drive.hr_name or '' }}" placeholder="e.g. Priya Sharma">
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>HR Email</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-envelope"></i>
+                            <input type="email" name="hr_email" value="{{ drive.hr_email or '' }}" placeholder="hr@company.com">
+                        </div>
+                    </div>
+                    <div class="input-field">
+                        <label>HR Phone</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-telephone"></i>
+                            <input type="text" name="hr_phone" value="{{ drive.hr_phone or '' }}" placeholder="e.g. 9876543210">
+                        </div>
+                    </div>
+                </div>
 
                 <div class="co-form-btn-row">
                     <button type="submit" class="btn-primary-custom">

@@ -56,6 +56,9 @@ class PlacementDrive(db.Model):
     salary= db.Column(db.String(50))
     location =db.Column(db.String(200))
     deadline = db.Column(db.Date)
+    hr_name = db.Column(db.String(100), nullable=True)
+    hr_email = db.Column(db.String(120), nullable=True)
+    hr_phone = db.Column(db.String(20), nullable=True)
     status= db.Column(db.String(25), default="Pending")
     created_at=db.Column(db.DateTime ,  default=datetime.utcnow)
 

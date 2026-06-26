@@ -1,115 +1,167 @@
-{% extends "base.html" %}
-{% block extra_css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
-{% endblock %}
-{% block full_page %}
+{% extends "base.html" %} {% block extra_css %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/auth.css') }}"
+/>
+{% endblock %} {% block full_page %}
 <div class="login-page-body">
-    <div class="login-wrapper">
-
-        <div class="login-left">
-            <div class="login-logo">
-                <div class="login-logo-icon">
-                    <i class="bi bi-building-fill"></i>
-                </div>
-                <span class="login-logo-text">Placify</span>
-            </div>
-
-            <div class="login-hero">
-                <h2>Post jobs &amp;<br>find top talent</h2>
-                <p>Register your company and start connecting with qualified students from top institutions.</p>
-            </div>
-
-            <div class="login-stats">
-                <div class="login-stat-pill">
-                    <span class="stat-dot" style="background-color: #22c55e;"></span>
-                    <span>Students registered</span>
-                    <strong>Active</strong>
-                </div>
-                <div class="login-stat-pill">
-                    <span class="stat-dot" style="background-color: #6366f1;"></span>
-                    <span>Placement drives</span>
-                    <strong>Live now</strong>
-                </div>
-                <div class="login-stat-pill">
-                    <span class="stat-dot" style="background-color: #f59e0b;"></span>
-                    <span>Admin verified</span>
-                    <strong>Trusted</strong>
-                </div>
-            </div>
+  <div class="login-wrapper">
+    <div class="login-left">
+      <div class="login-logo">
+        <div class="login-logo-icon">
+          <i class="bi bi-building-fill"></i>
         </div>
+        <span class="login-logo-text">Placify</span>
+      </div>
 
-        <div class="login-right" style="overflow-y: auto;">
+      <div class="login-hero">
+        <h2>Post jobs &amp;<br />find top talent</h2>
+        <p>
+          Register your company and start connecting with qualified students
+          from top institutions.
+        </p>
+      </div>
 
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show mb-3" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <h3>Register company</h3>
-            <p class="login-subtitle">Your account will be activated after admin approval</p>
-
-            <form method="POST" action="{{ url_for('register_company') }}" enctype="multipart/form-data">
-
-                <div class="input-field">
-                    <label>Company Name</label>
-                    <div class="input-wrap">
-                        <i class="bi bi-building"></i>
-                        <input type="text" name="name" placeholder="Your company name" required>
-                    </div>
-                </div>
-
-                <div class="input-field">
-                    <label>Email</label>
-                    <div class="input-wrap">
-                        <i class="bi bi-envelope"></i>
-                        <input type="email" name="email" placeholder="company@email.com" required>
-                    </div>
-                </div>
-
-                <div class="input-field">
-                    <label>Password</label>
-                    <div class="input-wrap">
-                        <i class="bi bi-lock"></i>
-                        <input type="password" name="password" placeholder="Create a password" required>
-                    </div>
-                </div>
-
-                <div class="input-field">
-                    <label>Website</label>
-                    <div class="input-wrap">
-                        <i class="bi bi-globe"></i>
-                        <input type="text" name="website" placeholder="https://yourcompany.com">
-                    </div>
-                </div>
-
-                <div class="input-field">
-                    <label>Certificate (PDF only)</label>
-                    <div class="input-wrap">
-                        <i class="bi bi-file-earmark-pdf"></i>
-                        <input type="file" name="certificate" accept=".pdf" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-primary-custom">
-                    Register <i class="bi bi-arrow-right"></i>
-                </button>
-
-            </form>
-
-            <div class="page-footer-link">
-                <span>Already have an account?</span>
-                <a href="{{ url_for('login') }}">
-                    Sign in <i class="bi bi-arrow-right-short"></i>
-                </a>
-            </div>
-
+      <div class="login-stats">
+        <div class="login-stat-pill">
+          <span class="stat-dot" style="background-color: #22c55e"></span>
+          <span>Students registered</span>
+          <strong>Active</strong>
         </div>
+        <div class="login-stat-pill">
+          <span class="stat-dot" style="background-color: #6366f1"></span>
+          <span>Placement drives</span>
+          <strong>Live now</strong>
+        </div>
+        <div class="login-stat-pill">
+          <span class="stat-dot" style="background-color: #f59e0b"></span>
+          <span>Admin verified</span>
+          <strong>Trusted</strong>
+        </div>
+      </div>
     </div>
+
+    <div class="login-right" style="overflow-y: auto">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="alert alert-{{ category }} alert-dismissible fade show mb-3"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
+
+      <h3>Register company</h3>
+      <p class="login-subtitle">
+        Your account will be activated after admin approval
+      </p>
+
+      {% if stage == "email" %}
+      <form method="POST" action="{{ url_for('register_company') }}">
+        <input type="hidden" name="stage" value="send_otp" />
+        <div class="input-field">
+          <label>Company Email</label>
+          <div class="input-wrap">
+            <i class="bi bi-envelope"></i>
+            <input
+              type="email"
+              name="email"
+              placeholder="company@email.com"
+              required
+            />
+          </div>
+        </div>
+        <button type="submit" class="btn-primary-custom">
+          Send OTP <i class="bi bi-arrow-right"></i>
+        </button>
+      </form>
+
+      {% elif stage == "otp" %}
+      <form method="POST" action="{{ url_for('register_company') }}">
+        <input type="hidden" name="stage" value="verify_otp" />
+        <input type="hidden" name="email" value="{{ email }}" />
+        <div class="input-field">
+          <label>Enter OTP sent to {{ email }}</label>
+          <div class="input-wrap">
+            <i class="bi bi-shield-lock"></i>
+            <input type="text" name="otp" placeholder="6-digit OTP" required />
+          </div>
+        </div>
+        <button type="submit" class="btn-primary-custom">
+          Verify OTP <i class="bi bi-arrow-right"></i>
+        </button>
+      </form>
+
+      {% elif stage == "details" %}
+      <form
+        method="POST"
+        action="{{ url_for('register_company') }}"
+        enctype="multipart/form-data"
+      >
+        <input type="hidden" name="stage" value="complete" />
+        <input type="hidden" name="email" value="{{ email }}" />
+        <div class="input-field">
+          <label>Company Name</label>
+          <div class="input-wrap">
+            <i class="bi bi-building"></i>
+            <input
+              type="text"
+              name="name"
+              placeholder="Your company name"
+              required
+            />
+          </div>
+        </div>
+        <div class="input-field">
+          <label>Password</label>
+          <div class="input-wrap">
+            <i class="bi bi-lock"></i>
+            <input
+              type="password"
+              name="password"
+              placeholder="Create a password"
+              required
+            />
+          </div>
+        </div>
+        <div class="input-field">
+          <label>Website</label>
+          <div class="input-wrap">
+            <i class="bi bi-globe"></i>
+            <input
+              type="text"
+              name="website"
+              placeholder="https://yourcompany.com"
+            />
+          </div>
+        </div>
+        <div class="input-field">
+          <label>Certificate (PDF only)</label>
+          <div class="input-wrap">
+            <i class="bi bi-file-earmark-pdf"></i>
+            <input type="file" name="certificate" accept=".pdf" required />
+          </div>
+        </div>
+        <button type="submit" class="btn-primary-custom">
+          Complete Registration <i class="bi bi-arrow-right"></i>
+        </button>
+      </form>
+      {% endif %}
+
+      <div class="page-footer-link">
+        <span>Already have an account?</span>
+        <a href="{{ url_for('login') }}"
+          >Sign in <i class="bi bi-arrow-right-short"></i
+        ></a>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

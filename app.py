@@ -164,15 +164,20 @@ def register_student():
             session["reg_otp_time"]=datetime.utcnow().isoformat()
 
             print("Sending OTP to:", email)
-            send_email(to=email, subject="Your Placify Account Registration", body=f"""Hello,
-Thank you for registering on the Placify portal. 
+            send_email(to=email, subject="Placify: Confirm your email address", body=f"""
+Hi,
 
-To complete your account setup, please use the following confirmation code:  {otp}
+We received a request to create a Placify student account with this email address.
 
-This code is valid for the next 10 minutes. If you did not request this, you can safely ignore this message.
+Your confirmation code is: {otp}
 
-Best regards,
-The Placify Team""")
+Enter this code on the registration page to continue. It expires in 10 minutes.
+
+If you did not request this, you can safely ignore this email. No account will be created.
+
+Regards,
+Placify Team
+Placement Portal""")
             flash("OTP sent to your email","success")
             return render_template("auth/register_student.html", stage="otp", email=email)
 
@@ -255,45 +260,83 @@ The Placify Team""")
 @app.route("/register/company" , methods=["GET", "POST"])
 def register_company():
     if request.method=="POST":
-        name=request.form.get("name","")
-        email=request.form.get("email","")
-        password=request.form.get("password","")
-        website=request.form.get("website","")
-        certificate=request.files.get("certificate")
+        stage = request.form.get("stage", "")
 
-        existing=Company.query.filter_by(email=email).first()
-        if existing:
-            flash("Email alrerady registered","danger")
-            return redirect(url_for("register_company"))
-        
-        if certificate and certificate.filename != "":
-            try:
-                upload_result = cloudinary.uploader.upload(certificate, folder="certificates", resource_type="auto")
-                filename = upload_result.get("secure_url")
-            except Exception as e:
-                flash("Certificate upload failed. Please try again.", "danger")
+        if stage == "send_otp":
+            email = request.form.get("email", "")
+            existing = Company.query.filter_by(email=email).first()
+            if existing:
+                flash("Email already registered", "danger")
                 return redirect(url_for("register_company"))
-        else:
-            flash("Please upload your Certificate", "danger")
-            return redirect(url_for("register_company"))
-        
-        hashed_password=generate_password_hash(password)
-        company=Company(
-            name=name,
-            email=email,
-            password=hashed_password,
-            website=website,
-            certificate=filename,
-            approval_status="Pending"
-        )
-            
-        
-        db.session.add(company)
-        db.session.commit()
+            otp = str(secrets.randbelow(900000) + 100000)
+            session["co_reg_otp"] = otp
+            session["co_reg_otp_email"] = email
+            session["co_reg_otp_time"] = datetime.utcnow().isoformat()
+            send_email(to=email, subject="Placify: Confirm your company email", body=f"""
+Hi,
 
-        flash("Registration Successful...Wait for admin approval","warning")
-        return redirect(url_for("login"))
-    return render_template("auth/register_company.html")
+We received a request to register a company account on Placify.
+
+Your confirmation code is: {otp}
+
+Enter this code on the registration page to continue. It expires in 10 minutes.
+
+If you did not initiate this request, please ignore this email. No account will be created.
+
+Regards,
+Placify Team
+Placement Portal""")
+            flash("OTP sent to your email", "success")
+            return render_template("auth/register_company.html", stage="otp", email=email)
+
+        elif stage == "verify_otp":
+            entered_otp = request.form.get("otp", "")
+            email = request.form.get("email", "")
+            otp_time = datetime.fromisoformat(session.get("co_reg_otp_time", "2000-01-01T00:00:00"))
+            if datetime.utcnow() - otp_time > timedelta(minutes=10):
+                flash("OTP expired, please try again", "danger")
+                return redirect(url_for("register_company"))
+            if entered_otp == session.get("co_reg_otp") and email == session.get("co_reg_otp_email"):
+                session["co_reg_email_verified"] = True
+                flash("Email verified! Complete your registration", "success")
+                return render_template("auth/register_company.html", stage="details", email=email)
+            else:
+                flash("Incorrect OTP", "danger")
+                return render_template("auth/register_company.html", stage="otp", email=email)
+
+        elif stage == "complete":
+            email = request.form.get("email", "")
+            if not session.get("co_reg_email_verified") or session.get("co_reg_otp_email") != email:
+                flash("Please verify your email first", "danger")
+                return redirect(url_for("register_company"))
+            name = request.form.get("name", "")
+            password = request.form.get("password", "")
+            website = request.form.get("website", "")
+            certificate = request.files.get("certificate")
+            if certificate and certificate.filename != "":
+                try:
+                    upload_result = cloudinary.uploader.upload(certificate, folder="certificates", resource_type="auto", access_mode="public")
+                    filename = upload_result.get("secure_url")
+                except Exception as e:
+                    flash("Certificate upload failed. Please try again.", "danger")
+                    return render_template("auth/register_company.html", stage="details", email=email)
+            else:
+                flash("Please upload your certificate", "danger")
+                return render_template("auth/register_company.html", stage="details", email=email)
+            hashed_password = generate_password_hash(password)
+            company = Company(
+                name=name,
+                email=email,
+                password=hashed_password,
+                website=website,
+                certificate=filename,
+                approval_status="Pending"
+            )
+            db.session.add(company)
+            db.session.commit()
+            flash("Registration successful! Wait for admin approval.", "warning")
+            return redirect(url_for("login"))
+    return render_template("auth/register_company.html", stage="email")
 
 ####################################################################
 
@@ -545,6 +588,9 @@ def company_create_drive():
         location= request.form.get("location", "")
         deadline_str = request.form.get("deadline", "")
         deadline =datetime.strptime(deadline_str, "%Y-%m-%d").date() if deadline_str else None
+        hr_name = request.form.get("hr_name", "")
+        hr_email = request.form.get("hr_email", "")
+        hr_phone = request.form.get("hr_phone", "")
         drive = PlacementDrive(
             company_id=company.id,
             job_title=job_title,
@@ -553,6 +599,9 @@ def company_create_drive():
             salary=salary,
             location=location,
             deadline=deadline,
+            hr_name=hr_name,
+            hr_email=hr_email,
+            hr_phone=hr_phone,
             status="Pending"
         )
         db.session.add(drive)
@@ -580,6 +629,9 @@ def company_edit_drive(id):
         drive.salary = request.form.get("salary", "")
         drive.location = request.form.get("location", "")
         deadline_str= request.form.get("deadline", "")
+        drive.hr_name = request.form.get("hr_name", "")
+        drive.hr_email = request.form.get("hr_email", "")
+        drive.hr_phone = request.form.get("hr_phone", "")
         drive.deadline=datetime.strptime(deadline_str, "%Y-%m-%d").date() if deadline_str else None
         db.session.commit()
         flash("Drive updated successfully!", "success")
@@ -781,6 +833,86 @@ def logout():
     flash("Logged out successfully","success")
     return redirect(url_for("login"))
 
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        stage = request.form.get("stage", "")
+
+        if stage == "send_otp":
+            email = request.form.get("email", "")
+            role = request.form.get("role", "")
+            user = None
+            if role == "student":
+                user = Student.query.filter_by(email=email).first()
+            elif role == "company":
+                user = Company.query.filter_by(email=email).first()
+            if not user:
+                flash("No account found with this email", "danger")
+                return render_template("auth/forgot_password.html", stage="email", role=role)
+            otp = str(secrets.randbelow(900000) + 100000)
+            session["fp_otp"] = otp
+            session["fp_email"] = email
+            session["fp_role"] = role
+            session["fp_otp_time"] = datetime.utcnow().isoformat()
+            send_email(to=email, subject="Placify: Password reset request", body=f"""
+Hi,
+
+We received a request to reset the password for your Placify account linked to this email.
+
+Your reset code is: {otp}
+
+Enter this code to proceed with setting a new password. It expires in 10 minutes.
+
+If you did not request a password reset, please ignore this email. Your password will remain unchanged.
+
+Regards,
+Placify Team
+Placement Portal""")
+            flash("OTP sent to your email", "success")
+            return render_template("auth/forgot_password.html", stage="otp", email=email, role=role)
+
+        elif stage == "verify_otp":
+            entered_otp = request.form.get("otp", "")
+            email = request.form.get("email", "")
+            role = request.form.get("role", "")
+            otp_time = datetime.fromisoformat(session.get("fp_otp_time", "2000-01-01T00:00:00"))
+            if datetime.utcnow() - otp_time > timedelta(minutes=10):
+                flash("OTP expired, please try again", "danger")
+                return redirect(url_for("forgot_password"))
+            if entered_otp == session.get("fp_otp") and email == session.get("fp_email"):
+                session["fp_verified"] = True
+                flash("OTP verified! Set your new password", "success")
+                return render_template("auth/forgot_password.html", stage="reset", email=email, role=role)
+            else:
+                flash("Incorrect OTP", "danger")
+                return render_template("auth/forgot_password.html", stage="otp", email=email, role=role)
+
+        elif stage == "reset":
+            email = request.form.get("email", "")
+            role = request.form.get("role", "")
+            if not session.get("fp_verified") or session.get("fp_email") != email:
+                flash("Please verify your email first", "danger")
+                return redirect(url_for("forgot_password"))
+            new_password = request.form.get("password", "")
+            if len(new_password) < 6:
+                flash("Password must be at least 6 characters", "danger")
+                return render_template("auth/forgot_password.html", stage="reset", email=email, role=role)
+            hashed = generate_password_hash(new_password)
+            if role == "student":
+                user = Student.query.filter_by(email=email).first()
+            else:
+                user = Company.query.filter_by(email=email).first()
+            user.password = hashed
+            db.session.commit()
+            session.pop("fp_otp", None)
+            session.pop("fp_email", None)
+            session.pop("fp_role", None)
+            session.pop("fp_otp_time", None)
+            session.pop("fp_verified", None)
+            flash("Password reset successful! Please login.", "success")
+            return redirect(url_for("login"))
+    return render_template("auth/forgot_password.html", stage="email")
 
 ###########################################################
 

@@ -54,6 +54,24 @@
                         <span class="ad-detail-label">Created</span>
                         <span class="ad-detail-value">{{ drive.created_at.strftime("%d %b %Y") }}</span>
                     </div>
+
+                    <div class="ad-detail-row">
+                        <span class="ad-detail-label">HR Name</span>
+                        <span class="ad-detail-value">{{ drive.hr_name }}</span>
+                    </div>
+
+
+                    <div class="ad-detail-row">
+                        <span class="ad-detail-label">HR Email</span>
+                        <span class="ad-detail-value">{{ drive.hr_email }}</span>
+                    </div>
+
+
+                    <div class="ad-detail-row">
+                        <span class="ad-detail-label">HR Phone</span>
+                        <span class="ad-detail-value">{{ drive.hr_phone }}</span>
+                    </div>
+
                 </div>
 
                 {% if drive.status == 'Pending' %}
